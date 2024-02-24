@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="FastMath::VectorBase&lt;*, 2&gt;">
+		<DisplayString>{{x={x} y={y}}}</DisplayString>
+		<Expand>
+			<Item Name="x">x</Item>
+			<Item Name="y">y</Item>
+		</Expand>
+	</Type>
+	<Type Name="FastMath::VectorBase&lt;*, 3&gt;">
+		<DisplayString>{{x={x} y={y} z={z}}}</DisplayString>
+		<Expand>
+			<Item Name="x">x</Item>
+			<Item Name="y">y</Item>
+			<Item Name="z">z</Item>
+		</Expand>
+	</Type>
+	<Type Name="FastMath::VectorBase&lt;*, 4&gt;">
+		<DisplayString>{{x={x} y={y} z={z} w={w}}}</DisplayString>
+		<Expand>
+			<Item Name="x">x</Item>
+			<Item Name="y">y</Item>
+			<Item Name="z">z</Item>
+			<Item Name="w">w</Item>
+		</Expand>
+	</Type>
+	<Type Name="FastMath::MatrixBase&lt;*, 4, 4&gt;">
+		<Expand>
+			<Item Name="X">X</Item>
+			<Item Name="Y">Y</Item>
+			<Item Name="Z">Z</Item>
+			<Item Name="W">W</Item>
+		</Expand>
+	</Type>
+	<Type Name="FastMath::QuaternionBase&lt;*&gt;">
+		<DisplayString>{{x={x} y={y} z={z} w={w}}}</DisplayString>
+		<Expand>
+			<Item Name="s">s</Item>
+			<Item Name="x">x</Item>
+			<Item Name="y">y</Item>
+			<Item Name="z">z</Item>
+		</Expand>
+	</Type>
+</AutoVisualizer>
