@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<buildprofiles xsi:noNamespaceSchemaLocation="https://resources.jetbrains.com/writerside/1.0/build-profiles.xsd"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <variables>
+        <primary-color>dracula</primary-color>
+        <custom-favicons>favicon.png</custom-favicons>
+        <header-logo>favicon.png</header-logo>
+        <product-web-url>%root_url%</product-web-url>
+        <download-title>GitHub</download-title>
+        <download-page>https://github.com/3dgep</download-page>
+        <showDownloadButton>false</showDownloadButton>
+    </variables>
+    <footer>
+        <copyright>3dgep.com %year%</copyright>
+        <social type="email" href="mailto:jeremiah@3dgep.com?subject=[%github_repository_name%]" />
+        <social type="youtube" href="https://youtube.com/@3dgep" />
+        <social type="facebook" href="https://facebook.com/3DGameEngineProgramming" />
+    </footer>
+</buildprofiles>

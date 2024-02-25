@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE vars SYSTEM "https://resources.jetbrains.com/writerside/1.0/vars.dtd">
+<vars>
+    <var name="product" value="Writerside"/>
+    <var name="title" value="3D Game Engine Programming" />
+    <var name="subtitle" value="Helping you build your dream game engine" />
+    <var name="root_url" value="https://3dgep.github.io" />
+    <var name="github_repository_name" value="FastMath" />
+    <var name="year" value="2024" />
+</vars>
