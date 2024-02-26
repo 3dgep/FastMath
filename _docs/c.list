@@ -2,5 +2,8 @@
 <!DOCTYPE categories
         SYSTEM "https://resources.jetbrains.com/writerside/1.0/categories.dtd">
 <categories>
-    <category id="wrs" name="Writerside documentation" order="1"/>
+    <category id="related" name="Related Topics" order="1" />
+    <category id="cppreference" name="C++ Reference" order="2"/>
+    <category id="external" name="External Sources" order="3"/>
+    <category id="reading" name="Recommended Reading" order="4"/>
 </categories>

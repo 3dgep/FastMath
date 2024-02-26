@@ -10,8 +10,8 @@ permissions:
   pages: write
 
 env:
-  INSTANCE: _docs/hi
-  ARTIFACT: webHelpHI2-all.zip
+  INSTANCE: _docs/fm
+  ARTIFACT: webHelpFM2-all.zip
   DOCKER_VERSION: 233.14389
 
 jobs:

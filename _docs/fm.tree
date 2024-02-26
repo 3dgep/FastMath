@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE instance-profile
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+
+<instance-profile id="fm"
+                 name="FastMath"
+                 start-page="index.md">
+    <toc-element topic="index.md"/>
+    <toc-element topic="C-Templates.md">
+        <toc-element topic="Template-Parameters.md"/>
+        <toc-element topic="Function-Templates.md"/>
+        <toc-element topic="Class-Templates.md"/>
+        <toc-element topic="Variable-Templates.md"/>
+        <toc-element topic="Alias-Template.md"/>
+    </toc-element>
+</instance-profile>
