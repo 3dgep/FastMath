@@ -1,7 +1,7 @@
 # C++ Templates
 
 <tldr>
-    <p>C++ templates are used to describe a family of classes (<emphasis>class template</emphasis>), a family of functions (<emphasis>function template</emphasis>), or a family of variables (<emphasis>variable template</emphasis>).</p>
+    <p>C++ templates are used to describe a family of classes (<emphasis>class templates</emphasis>), a family of functions (<emphasis>function templates</emphasis>), or a family of variables (<emphasis>variable templates</emphasis>).</p>
 </tldr>
 
 C++ template programming is not a new concept. 
