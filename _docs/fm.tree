@@ -5,6 +5,9 @@
 <instance-profile id="fm"
                  name="FastMath"
                  start-page="index.md">
-
     <toc-element topic="index.md"/>
+    <toc-element topic="C-Templates.md">
+        <toc-element topic="Template-Parameters.md"/>
+        <toc-element topic="Function-Templates.md"/>
+    </toc-element>
 </instance-profile>
