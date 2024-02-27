@@ -28,3 +28,6 @@ public:
 private:
     T m_Data[N];
 };
+
+extern template Array<float, 2>; // Explicit template instantiation declaration.
+extern template Array<float, 3>; // Explicit template instantiation declaration.
