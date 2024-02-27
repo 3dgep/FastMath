@@ -3,8 +3,6 @@
 Declaring a class template does not actually cause any code to be generated unless the class template is _instantiated_ (either implicitly or explicitly).
 A class template is instantiated when template arguments are provided which will instruct the compiler to instantiate the class template with the specified template arguments.
 
-You can force the compiler to compile your class template with specific template arguments using _explicit template instantiation_.
-
 An explicit template instantiation forces the compiler to create a definition of your class template with specific template arguments.
 This has multiple advantages:
 
@@ -31,12 +29,12 @@ The explicit template definition must only appear once in the entire program, so
 
 ```c++
 ```
-{src="Array.cpp" include-lines="1,23-25" collapsible="true" default-state="expanded"}
+{src="Array.cpp" include-lines="1,23-25" collapsible="true" default-state="expanded" collapsed-title="Array.cpp"}
 
 An explicit template instantiation definition must only appear in a single compilation unit in the entire program.
 This is usually accomplished by placing the explicit template instantiation definition in a source file (<path>.cpp</path>) that is only compiled once for the entire program.
 
-> Multiple _definitions_ of the same explicit template instantiation in the same program will result in a violation of the [One Definition Rule (ODR)][ODR] and likely cause linker errors.
+> Multiple _definitions_ of the same explicit template instantiation in the same program is a violation of the [One Definition Rule (ODR)][ODR] and likely cause linker errors.
 {style="warning"}
 
 ## Explicit Instantiation Declaration

@@ -10,8 +10,9 @@
         <toc-element topic="Template-Parameters.md"/>
         <toc-element topic="Function-Templates.md"/>
         <toc-element topic="Class-Templates.md"/>
+        <toc-element topic="Explicit-Instantiation.md"/>
         <toc-element topic="Variable-Templates.md"/>
         <toc-element topic="Alias-Template.md"/>
-        <toc-element topic="Explicit-Instantiation.md"/>
+        <toc-element topic="Template-Specialization.md"/>
     </toc-element>
 </instance-profile>
