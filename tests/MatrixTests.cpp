@@ -396,7 +396,7 @@ TEST( Matrix, Matrix_Inverse4 )
     Matrix3d a = { { 1, 2, 3 }, { 3, 2, 1 }, { 2, 1, 3 } };
     Matrix3d b = Matrix3d::IDENTITY;
 
-    // Multiplying a matrix by it's inverse results in the Identity matrix.
+    // Multiplying a matrix by its inverse results in the Identity matrix.
     auto a_inv = inverse( a );
     auto I     = a * a_inv;
 

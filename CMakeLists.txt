@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23.0) # The version of CMake used when creating this project.
+cmake_minimum_required(VERSION 3.22.1) # The version of CMake used when creating this project.
 
 option( FASTMATH_BUILD_EXAMPLES "Build examples for LightSpeed Engine." ON )
 option( FASTMATH_BUILD_DOCUMENTATION "Build the documentation for LightSpeed Engine." OFF )
@@ -37,6 +37,7 @@ add_subdirectory(src)
 
 if(FASTMATH_BUILD_TESTING)
 	# Add tests.
+	include(CTest)
 	add_subdirectory(tests)
 endif(FASTMATH_BUILD_TESTING)
 

@@ -135,7 +135,7 @@ template<>
 struct alignas( 16 ) VectorBase<float, 4>
 {
     constexpr VectorBase() noexcept;
-    constexpr VectorBase( __m128 v ) noexcept;
+    VectorBase( __m128 v ) noexcept;
 
     union
     {
@@ -158,7 +158,7 @@ constexpr VectorBase<float, 4>::VectorBase() noexcept
 : vec {}
 {}
 
-constexpr VectorBase<float, 4>::VectorBase( __m128 v ) noexcept
+inline VectorBase<float, 4>::VectorBase( __m128 v ) noexcept
 : v { v }
 {}
 

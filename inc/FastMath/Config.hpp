@@ -1,5 +1,6 @@
 #pragma once
 
+// Compiler detection.
 #define LS_COMPILER_CLANG ( 1 << 0 )
 #define LS_COMPILER_GCC   ( 1 << 1 )
 #define LS_COMPILER_MSVC  ( 1 << 2 )
@@ -10,26 +11,6 @@
     #define LS_COMPILER LS_COMPILER_GCC
 #elif defined( _MSC_VER )
     #define LS_COMPILER LS_COMPILER_MSVC
-#endif
-
-#if LS_COMPILER == LS_COMPILER_CLANG
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
-    #pragma clang diagnostic ignored "-Wnested-anon-types"
-#elif LS_COMPILER == LS_COMPILER_GCC
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-#elif LS_COMPILER == LS_COMPILER_MSVC
-    #pragma warning( push )
-    #pragma warning( disable : 4201 )
-#endif
-
-#if LS_COMPILER == LS_COMPILER_CLANG
-    #pragma clang diagnostic pop
-#elif LS_COMPILER == LS_COMPILER_GCC
-    #pragma GCC diagnostic pop
-#elif LS_COMPILER == LS_COMPILER_MSVC
-    #pragma warning( pop )
 #endif
 
 // Configuration for depth control and handedness.

@@ -109,9 +109,9 @@ constexpr T shiftBias( U x, U shift, U bias ) noexcept
 /// <param name="mask">The mask to use for the alignment.</param>
 /// <returns>The aligned value.</returns>
 template<Integral T>
-constexpr T alignUpWithMask( T value, size_t mask ) noexcept
+constexpr T alignUpWithMask( T value, std::size_t mask ) noexcept
 {
-    return T( ( static_cast<size_t>( value ) + mask ) & ~mask );
+    return T( ( static_cast<std::size_t>( value ) + mask ) & ~mask );
 }
 
 /// <summary>
@@ -122,9 +122,9 @@ constexpr T alignUpWithMask( T value, size_t mask ) noexcept
 /// <param name="mask">The mask to use for the alignment.</param>
 /// <returns>The aligned value.</returns>
 template<Integral T>
-constexpr T alignDownWithMask( T value, size_t mask ) noexcept
+constexpr T alignDownWithMask( T value, std::size_t mask ) noexcept
 {
-    return T( static_cast<size_t>( value ) & ~mask );
+    return T( static_cast<std::size_t>( value ) & ~mask );
 }
 
 /// <summary>
@@ -135,7 +135,7 @@ constexpr T alignDownWithMask( T value, size_t mask ) noexcept
 /// <param name="alignment">The required alignment.</param>
 /// <returns>The aligned value.</returns>
 template<Integral T>
-constexpr T alignUp( T value, size_t alignment ) noexcept
+constexpr T alignUp( T value, std::size_t alignment ) noexcept
 {
     return alignUpWithMask( value, alignment - 1 );
 }
@@ -148,7 +148,7 @@ constexpr T alignUp( T value, size_t alignment ) noexcept
 /// <param name="alignment">The required alignment.</param>
 /// <returns>The aligned value.</returns>
 template<Integral T>
-constexpr T alignDown( T value, size_t alignment ) noexcept
+constexpr T alignDown( T value, std::size_t alignment ) noexcept
 {
     return alignDownWithMask( value, alignment - 1 );
 }
@@ -161,9 +161,9 @@ constexpr T alignDown( T value, size_t alignment ) noexcept
 /// <param name="alignment">The required alignment.</param>
 /// <returns>`true` if `value` is aligned to `alignment`, `false` otherwise.</returns>
 template<Integral T>
-constexpr bool isAligned( T value, size_t alignment ) noexcept
+constexpr bool isAligned( T value, std::size_t alignment ) noexcept
 {
-    return 0 == ( static_cast<size_t>( value ) & ( alignment - 1 ) );
+    return 0 == ( static_cast<std::size_t>( value ) & ( alignment - 1 ) );
 }
 
 /// <summary>
@@ -175,7 +175,7 @@ constexpr bool isAligned( T value, size_t alignment ) noexcept
 /// <param name="alignment">The alignment to divide.</param>
 /// <returns>The result of dividing by a multiple of `alignment`.</returns>
 template<typename T>
-constexpr T divideByMultiple( T value, size_t alignment ) noexcept
+constexpr T divideByMultiple( T value, std::size_t alignment ) noexcept
 {
     return static_cast<T>( ( value + alignment - 1 ) / alignment );
 }
