@@ -282,7 +282,8 @@ struct Vector : VectorBase<T, N>
     /// Unary minus operator.
     /// </summary>
     /// <returns>A negated copy of this vector.</returns>
-    constexpr Vector<T, N> operator-() const noexcept;
+    constexpr Vector<T, N> operator-() const noexcept
+        requires IsSigned<T>;
 
     /// <summary>
     /// Vector addition.
@@ -630,6 +631,7 @@ constexpr Vector<T, N> Vector<T, N>::operator+() const noexcept
 
 template<typename T, std::size_t N>
 constexpr Vector<T, N> Vector<T, N>::operator-() const noexcept
+    requires IsSigned<T>
 {
     Vector<T, N> res;
 

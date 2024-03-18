@@ -61,9 +61,9 @@ const Vector<T, 3>& Transform<T>::getScale() const noexcept
 }
 
 template<typename T>
-void Transform<T>::setScale( const Vector<T, 3>& scale ) noexcept
+void Transform<T>::setScale( const Vector<T, 3>& _scale ) noexcept
 {
-    this->scale = scale;
+    scale = _scale;
     isDirty     = true;
 }
 
@@ -74,9 +74,9 @@ const Vector<T, 3>& Transform<T>::getTranslate() const noexcept
 }
 
 template<typename T>
-void Transform<T>::setTranslate( const Vector<T, 3>& translate ) noexcept
+void Transform<T>::setTranslate( const Vector<T, 3>& _translate ) noexcept
 {
-    this->translate = translate;
+    translate = _translate;
     isDirty         = true;
 }
 
@@ -87,9 +87,9 @@ const Vector<T, 3>& Transform<T>::getRotationOrigin() const noexcept
 }
 
 template<typename T>
-void Transform<T>::setRotationOrigin( const Vector<T, 3>& rotationOrigin ) noexcept
+void Transform<T>::setRotationOrigin( const Vector<T, 3>& _rotationOrigin ) noexcept
 {
-    this->rotationOrigin = rotationOrigin;
+    rotationOrigin = _rotationOrigin;
     isDirty              = true;
 }
 
@@ -100,9 +100,9 @@ const Quaternion<T>& Transform<T>::getRotation() const noexcept
 }
 
 template<typename T>
-void Transform<T>::setRotation( const Quaternion<T>& rotation ) noexcept
+void Transform<T>::setRotation( const Quaternion<T>& _rotation ) noexcept
 {
-    this->rotation = rotation;
+    rotation = _rotation;
     isDirty        = true;
 }
 

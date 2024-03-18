@@ -8,14 +8,14 @@ For example, suppose we want a function that creates a [std::unique_ptr][unique_
 ```
 {src="VariadicTemplates.hpp" include-lines="1-5" collapsible="true" default-state="expanded" collapsed-title-line-number="2"}
 
-> For some reason, [std::make_shared][make_shared] was introduced in C++11 but [std::make_unique][make_unique] wasn't introduced until C++14.
-> This example provides a possible implementation of [std::make_unique][make_unique] for C++11 compilers.
+> For some reason, [`std::make_shared`][make_shared] was introduced in C++11 but [`std::make_unique`][make_unique] wasn't introduced until C++14.
+> This example provides a possible implementation of [`std::make_unique`][make_unique] for C++11 compilers.
 {style="note"}
 
 There are a few things to note here:
 
 1. The template parameter list contains a _template parameter pack_ in the form of `typename... Args`
-2. An arbitrary number of arguments are passed to the function in the form of `Args&&...`. Not to be mistaken by an _r-value reference_, this is called a [forwarding reference][forwarding_references] which preserves the value category of the function arguments when used in conjunction with [std::forward][forward]
+2. An arbitrary number of arguments are passed to the function in the form of `Args&&...`. Not to be mistaken by an _r-value reference_, this is called a [forwarding reference][forwarding_references] which preserves the value category of the function arguments when used in conjunction with [`std::forward`][forward]
 3. The arguments are unpacked by performing a _pack expansion_ which replaces the parameter pack by a comma-separated list of the arguments using the pattern immediately preceding the `...` (ellipsis)
 
 For example, suppose we have the following class:

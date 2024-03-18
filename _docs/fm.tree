@@ -17,4 +17,6 @@
         <toc-element topic="Partial-Specialization.md"/>
         <toc-element topic="Variadic-Templates.md"/>
     </toc-element>
+    <toc-element topic="FastMath-Library.md"/>
+    <toc-element topic="Vectors.md"/>
 </instance-profile>
