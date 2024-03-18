@@ -1,6 +1,7 @@
 # Function Templates
 
-Function templates provide a mechanism to define a function that operates on different types.
+Function templates provide a mechanism to define a family of functions that operates on different types.
+
 Function templates look like ordinary functions but start with the `template` keyword followed by a list of (one or more) template parameters surrounded by angle brackets.
 
 ```c++

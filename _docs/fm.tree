@@ -14,5 +14,7 @@
         <toc-element topic="Variable-Templates.md"/>
         <toc-element topic="Alias-Template.md"/>
         <toc-element topic="Template-Specialization.md"/>
+        <toc-element topic="Partial-Specialization.md"/>
+        <toc-element topic="Variadic-Templates.md"/>
     </toc-element>
 </instance-profile>

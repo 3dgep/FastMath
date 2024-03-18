@@ -49,3 +49,9 @@ double add(double a, double b)
 
 float a = add(3.0f, 4.0f); // Uses primary function template.
 double b = add(3.0, 4.0);  // Uses specialized version for doubles.
+
+template<typename T, typename U>
+auto max(const T* a, const U* b) -> decltype(*a > *b ? *a : *b)
+{
+    return *a > *b ? *a : *b;
+}

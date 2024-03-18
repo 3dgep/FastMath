@@ -1,5 +1,7 @@
 # Template Parameters
 
+A template parameter is a placeholder for a type or non-type template argument.
+
 Before we get into the various types of templates that we can create in C++, let's first take a look at the different types
 of parameters a template can have. 
 First, let's define the distinction between a _template parameter_, and a _template argument_:

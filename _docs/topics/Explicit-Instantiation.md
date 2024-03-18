@@ -1,12 +1,14 @@
 # Explicit Instantiation
 
-Declaring a class template does not actually cause any code to be generated unless the class template is _instantiated_ (either implicitly or explicitly).
+Explicit Instantiation allows you to define a function or class template with a specific set of template arguments.
+
+Declaring a class template does not cause any code to be generated unless the class template is _instantiated_ (either implicitly or explicitly).
 A class template is instantiated when template arguments are provided which will instruct the compiler to instantiate the class template with the specified template arguments.
 
 An explicit template instantiation forces the compiler to create a definition of your class template with specific template arguments.
 This has multiple advantages:
 
-1. The class template is compiled. If there are any syntax errors (or warnings), you're compiler will let you know.
+1. The class template is compiled. If there are any syntax errors (or warnings), your compiler will let you know.
 2. Reduced compilation times if the same set of template arguments are used in multiple compilation units.
 
 If you want to take advantage of explicit template instantiation in your template library, you must consider two things:
@@ -32,7 +34,7 @@ The explicit template definition must only appear once in the entire program, so
 {src="Array.cpp" include-lines="1,23-25" collapsible="true" default-state="expanded" collapsed-title="Array.cpp"}
 
 An explicit template instantiation definition must only appear in a single compilation unit in the entire program.
-This is usually accomplished by placing the explicit template instantiation definition in a source file (<path>.cpp</path>) that is only compiled once for the entire program.
+This is usually achieved by placing the explicit template instantiation definition in a source file (<path>.cpp</path>) that is only compiled once for the entire program.
 
 > Multiple _definitions_ of the same explicit template instantiation in the same program is a violation of the [One Definition Rule (ODR)][ODR] and likely cause linker errors.
 {style="warning"}
@@ -43,8 +45,10 @@ An _explicit instantiation declaration_ is used to let the compiler know that th
 The declaration looks very similar to the definition, except with the `extern` keyword prepended to the declaration.
 
 ```c++
+extern template Array<float, 2>; // Explicit template instantiation declaration.
+extern template Array<float, 3>; // Explicit template instantiation declaration.
 ```
-{src="Array.hpp" include-lines="32-33" collapsible="true" default-state="expanded"}
+{collapsible="true" default-state="expanded"}
 
 Unlike the definition, the declaration can appear as many times as necessary in any number of compilation units in your entire program.
 When the compiler sees an explicit instantiation declaration, and you declare a variable using the same template arguments, it will skip the implicit instantiation step and use the code that was generated from the definition instead.
