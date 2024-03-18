@@ -1,5 +1,7 @@
 # Template Parameters
 
+A template parameter is a placeholder for a type or non-type template argument.
+
 Before we get into the various types of templates that we can create in C++, let's first take a look at the different types
 of parameters a template can have. 
 First, let's define the distinction between a _template parameter_, and a _template argument_:
@@ -70,13 +72,13 @@ Non-type template parameters can be used to specify a _value_ rather than a _typ
 Non-type template parameters can be:
 
 1. An integral type (`bool`, `char`, `int`, `size_t` and unsigned variants of those types)
-2. (C++20) A floating-point type (`float`, `double`)
+2. <shortcut>C++20</shortcut> A floating-point type (`float`, `double`)
 3. An enumeration type
 4. An lvalue reference type (a reference to an existing object or function)
 5. A pointer type (a pointer to an existing object or function)
 6. A pointer to a member type (a pointer to a member object or member function of a class)
 7. [std::nullptr_t](https://en.cppreference.com/w/cpp/types/nullptr_t)
-8. (C++ 20) A literal class type
+8. <shortcut>C++20</shortcut> A literal class type
 
 Don't worry too much about the different ways a non-type template parameter can be specified. 
 We will only be concerned with integral types in this series.

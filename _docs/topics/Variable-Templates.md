@@ -1,5 +1,7 @@
 # Variable Templates
 
+A variable template is used to define a family of variables that can be represented with different types.
+
 _Variable templates_ were added to the C++ standard with C++14.
 Variable templates allow you to define a family of variables or static data members of a class using template syntax.
 

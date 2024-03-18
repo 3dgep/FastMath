@@ -2,6 +2,18 @@
 
 #include "Config.hpp"
 
+#if LS_COMPILER == LS_COMPILER_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+    #pragma clang diagnostic ignored "-Wnested-anon-types"
+#elif LS_COMPILER == LS_COMPILER_GCC
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+#elif LS_COMPILER == LS_COMPILER_MSVC
+    #pragma warning( push )
+    #pragma warning( disable : 4201 )
+#endif
+
 namespace FastMath
 {
 template<typename T>
@@ -107,3 +119,11 @@ constexpr QuaternionBase<double>::operator __m256d() const noexcept
 #endif
 
 }  // namespace FastMath
+
+#if LS_COMPILER == LS_COMPILER_CLANG
+    #pragma clang diagnostic pop
+#elif LS_COMPILER == LS_COMPILER_GCC
+    #pragma GCC diagnostic pop
+#elif LS_COMPILER == LS_COMPILER_MSVC
+    #pragma warning( pop )
+#endif

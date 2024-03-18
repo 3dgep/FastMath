@@ -1,5 +1,7 @@
 # Class Templates
 
+A class template defines a family of classes that operate on different types.
+
 Similar to [Function Templates](Function-Templates.md), classes can also be parameterized with one or more template parameters.
 The most common use cases for class templates are containers for other types.
 If you have used any of the container types in the Standard Template Library (STL) (such as [`std::vector`][vector], [`std::map`][map], or [`std::array`][array]), then you have already used class templates.

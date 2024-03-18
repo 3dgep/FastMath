@@ -25,9 +25,9 @@ add_library( FastMath STATIC ${INC} ${SRC} )
 
 target_compile_features( FastMath PUBLIC cxx_std_20 )
 if(MSVC)
-    target_compile_options( FastMath PUBLIC /arch:AVX2 /fp:fast)
+    target_compile_options( FastMath PUBLIC /arch:AVX2 /fp:fast PRIVATE /W4 /WX )
 else()
-    target_compile_options( FastMath PUBLIC -mavx2 -ffast-math)
+    target_compile_options( FastMath PUBLIC -mavx2 -ffast-math PRIVATE -Wall -Wextra -Werror -pedantic)
 endif()
 
 target_include_directories( FastMath

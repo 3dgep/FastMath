@@ -26,3 +26,32 @@ auto max(T a, U b) -> decltype(a > b ? a : b)
 }
 
 auto x = max(3.0, 5); // Automatically deduce the return type.
+
+// Primary template.
+template<typename T, typename U>
+auto add(T a, U b) -> decltype(a + b)
+{
+    return a + b;
+}
+
+// Specialized function template.
+template<>
+double add<double, double>(double a, double b)
+{
+    return a + b;
+}
+
+// Function overloading.
+double add(double a, double b)
+{
+    return a + b;
+}
+
+float a = add(3.0f, 4.0f); // Uses primary function template.
+double b = add(3.0, 4.0);  // Uses specialized version for doubles.
+
+template<typename T, typename U>
+auto max(const T* a, const U* b) -> decltype(*a > *b ? *a : *b)
+{
+    return *a > *b ? *a : *b;
+}

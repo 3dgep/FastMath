@@ -1,6 +1,7 @@
 #pragma once
 #include <concepts>
 #include <limits>
+#include <type_traits>
 
 /// <summary>
 /// A concept that checks if a type (`From`) is convertible to 
@@ -39,3 +40,6 @@ concept Arithmetic = std::is_arithmetic_v<T>;
 /// <summary>
 template<typename T>
 concept HasInfinity = std::numeric_limits<T>::has_infinity;
+
+template<typename T>
+concept IsSigned = std::is_signed_v<T>;

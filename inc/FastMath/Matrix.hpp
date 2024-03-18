@@ -208,7 +208,8 @@ struct Matrix : MatrixBase<T, N, M>
     /// \f]
     /// </summary>
     /// <returns>A matrix with each element of this matrix negated.</returns>
-    constexpr Matrix<T, N, M> operator-() const noexcept;
+    constexpr Matrix<T, N, M> operator-() const noexcept
+        requires IsSigned<T>;
 
     /// <summary>
     /// Add this matrix to another:
@@ -548,11 +549,11 @@ constexpr Matrix<T, N, M>::Matrix( const Matrix<X, I, J>& copy ) noexcept
     constexpr std::size_t n = std::min( N, I );
     constexpr std::size_t m = std::min( M, J );
 
-    for ( int i = 0; i < n; ++i )
-        for ( int j = 0; j < m; ++j )
+    for ( std::size_t i = 0; i < n; ++i )
+        for ( std::size_t j = 0; j < m; ++j )
             base::m[i * M + j] = static_cast<T>( copy.m[i * J + j] );
 
-    for ( int k = std::min( n, m ); k < rank; ++k )
+    for ( std::size_t k = std::min( n, m ); k < rank; ++k )
         base::m[k * M + k] = T( 1 );
 }
 
@@ -560,9 +561,9 @@ template<typename T, std::size_t N, std::size_t M>
 template<ConvertibleTo<T> U>
 constexpr Matrix<T, N, M>::Matrix( const Matrix<U, N + 1, M + 1>& copy, std::size_t i, std::size_t j ) noexcept
 {
-    int c = 0;
-    for ( int row = 0; row <= N; ++row )
-        for ( int col = 0; col <= M; ++col )
+    std::size_t c = 0;
+    for ( std::size_t row = 0; row <= N; ++row )
+        for ( std::size_t col = 0; col <= M; ++col )
         {
             if ( row != i && col != j )
                 base::m[c++] = static_cast<T>( copy.m[row * ( M + 1 ) + col] );
@@ -576,8 +577,8 @@ constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator=( const Matrix<U, I, J>& rh
     constexpr std::size_t n = std::min( N, I );
     constexpr std::size_t m = std::min( M, J );
 
-    for ( int i = 0; i < n; ++i )
-        for ( int j = 0; j < m; ++j )
+    for ( std::size_t i = 0; i < n; ++i )
+        for ( std::size_t j = 0; j < m; ++j )
             base::m[i * M + j] = static_cast<T>( rhs.m[i * J + j] );
 
     return *this;
@@ -605,11 +606,12 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator+() const noexcept
 
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M> Matrix<T, N, M>::operator-() const noexcept
+    requires IsSigned<T>
 {
     Matrix<T, N, M> res;
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             res.m[i * M + j] = -base::m[i * M + j];
 
     return res;
@@ -620,8 +622,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator+( const Matrix<T, N, M>& rhs
 {
     Matrix<T, N, M> res;
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             res.m[i * M + j] = base::m[i * M + j] + rhs.m[i * M + j];
 
     return res;
@@ -630,8 +632,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator+( const Matrix<T, N, M>& rhs
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator+=( const Matrix<T, N, M>& rhs ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             base::m[i * M + j] += rhs.m[i * M + j];
 
     return *this;
@@ -642,8 +644,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator-( const Matrix<T, N, M>& rhs
 {
     Matrix<T, N, M> res;
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             res.m[i * M + j] = base::m[i * M + j] - rhs.m[i * M + j];
 
     return res;
@@ -652,8 +654,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator-( const Matrix<T, N, M>& rhs
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator-=( const Matrix<T, N, M>& rhs ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             base::m[i * M + j] -= rhs.m[i * M + j];
 
     return *this;
@@ -664,8 +666,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator*( T s ) const noexcept
 {
     Matrix<T, N, M> res;
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             res.m[i * M + j] = base::m[i * M + j] * s;
 
     return res;
@@ -674,8 +676,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator*( T s ) const noexcept
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator*=( T s ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             base::m[i * M + j] *= s;
 
     return *this;
@@ -689,8 +691,8 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator/( T s ) const noexcept
     if ( s != T( 0 ) )
     {
         T s_inv = T( 1 ) / s;
-        for ( int i = 0; i < N; ++i )
-            for ( int j = 0; j < M; ++j )
+        for ( std::size_t i = 0; i < N; ++i )
+            for ( std::size_t j = 0; j < M; ++j )
                 res.m[i * M + j] = base::m[i * M + j] * s_inv;
     }
 
@@ -703,8 +705,8 @@ constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator/=( T s ) noexcept
     if ( s != T( 0 ) )
     {
         T s_inv = T( 1 ) / s;
-        for ( int i = 0; i < N; ++i )
-            for ( int j = 0; j < M; ++j )
+        for ( std::size_t i = 0; i < N; ++i )
+            for ( std::size_t j = 0; j < M; ++j )
                 base::m[i * M + j] *= s_inv;
     }
 
@@ -716,8 +718,8 @@ constexpr Vector<T, N> Matrix<T, N, M>::operator*( const Vector<T, M>& rhs ) con
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             res.vec[i] += base::m[i * M + j] * rhs.vec[j];
 
     return res;
@@ -729,9 +731,9 @@ constexpr Matrix<T, N, P> Matrix<T, N, M>::operator*( const Matrix<T, M, P>& rhs
 {
     Matrix<T, N, P> res {};
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
-            for ( int k = 0; k < P; ++k )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
+            for ( std::size_t k = 0; k < P; ++k )
                 res.m[i * P + j] += base::m[i * M + k] * rhs.m[k * P + j];
 
     return res;
@@ -749,7 +751,7 @@ template<typename T, std::size_t N, std::size_t M>
 constexpr bool Matrix<T, N, M>::operator==( const Matrix<T, N, M>& rhs ) const noexcept
 {
     bool res = base::m[0] == rhs.m[0];
-    for ( int i = 1; i < N * M && res; ++i )
+    for ( std::size_t i = 1; i < N * M && res; ++i )
         res = base::m[i] == rhs.m[i];
 
     return res;
@@ -768,8 +770,8 @@ struct Matrix_Transpose
     {
         Matrix<T, M, N> res;
 
-        for ( int i = 0; i < N; ++i )
-            for ( int j = 0; j < M; ++j )
+        for ( std::size_t i = 0; i < N; ++i )
+            for ( std::size_t j = 0; j < M; ++j )
                 res.m[j * N + i] = m.m[i * M + j];
 
         return res;
@@ -786,8 +788,8 @@ struct Matrix_Transpose<T, N, N>
 {
     static constexpr Matrix<T, N, N> transpose( Matrix<T, N, N> m ) noexcept
     {
-        for ( int i = 0; i < N; ++i )
-            for ( int j = i + 1; j < N; ++j )
+        for ( std::size_t i = 0; i < N; ++i )
+            for ( std::size_t j = i + 1; j < N; ++j )
                 std::swap( m.m[i * N + j], m.m[j * N + i] );
 
         return m;

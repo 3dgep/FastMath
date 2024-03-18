@@ -419,7 +419,7 @@ constexpr Quaternion<T> fromMat3( const Matrix<T, 3>& m ) noexcept
 
     if ( m[1][1] > m[2][2] )
     {
-        const T s = T( 2 ) * std::sqrtf( T( 1 ) + m[1][1] - m[0][0] - m[2][2] );
+        const T s = T( 2 ) * std::sqrt( T( 1 ) + m[1][1] - m[0][0] - m[2][2] );
         return {
             ( m[0][2] - m[2][0] ) / s,
             ( m[0][1] + m[1][0] ) / s,
@@ -428,7 +428,7 @@ constexpr Quaternion<T> fromMat3( const Matrix<T, 3>& m ) noexcept
         };
     }
 
-    const T s = T( 2 ) * sqrtf( T( 1 ) + m[2][2] - m[0][0] - m[1][1] );
+    const T s = T( 2 ) * std::sqrt( T( 1 ) + m[2][2] - m[0][0] - m[1][1] );
     return {
         ( m[1][0] - m[0][1] ) / s,
         ( m[0][2] + m[2][0] ) / s,
