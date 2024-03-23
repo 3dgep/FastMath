@@ -498,9 +498,7 @@ constexpr Quaternion<T>::Quaternion( const Matrix<T, 4>& m ) noexcept
 /// <summary>
 /// Convert a quaternion to a 3x3 rotation matrix.
 /// \f[ \mathbf{R}_q = \begin{bmatrix}
-/// 1 - 2y^2 - 2z^2 & 2xy - 2wz & 2xz + wy \\
-/// 2xy + 2wz & 1 - 2x^2 - 2z^2 & 2yz - 2wx \\
-/// 2xz - 2wy & 2yz + 2wx & 1 - 2x^2 - 2y^2 \\
+/// 1 - 2y^2 - 2z^2 & 2xy - 2wz & 2xz + wy \\ 2xy + 2wz & 1 - 2x^2 - 2z^2 & 2yz - 2wx \\ 2xz - 2wy & 2yz + 2wx & 1 - 2x^2 - 2y^2
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The quaternion type.</typeparam>
@@ -541,10 +539,7 @@ constexpr Quaternion<T>::operator Matrix<T, 3>() const noexcept
 /// <summary>
 /// Convert a quaternion to a 4x4 rotation matrix.
 /// \f[ \mathbf{R}_q = \begin{bmatrix}
-/// 1 - 2y^2 - 2z^2 & 2xy - 2wz & 2xz + wy & 0 \\
-/// 2xy + 2wz & 1 - 2x^2 - 2z^2 & 2yz - 2wx & 0 \\
-/// 2xz - 2wy & 2yz + 2wx & 1 - 2x^2 - 2y^2 & 0 \\
-/// 0 & 0 & 0 & 1
+/// 1 - 2y^2 - 2z^2 & 2xy - 2wz & 2xz + wy & 0 \\ 2xy + 2wz & 1 - 2x^2 - 2z^2 & 2yz - 2wx & 0 \\ 2xz - 2wy & 2yz + 2wx & 1 - 2x^2 - 2y^2 & 0 \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The quaternion type.</typeparam>

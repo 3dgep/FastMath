@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "cstddef": "cpp",
+        "string": "cpp",
+        "type_traits": "cpp",
+        "cmath": "cpp",
+        "functional": "cpp",
+        "limits": "cpp",
+        "span": "cpp",
+        "utility": "cpp"
+    }
+}

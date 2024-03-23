@@ -351,10 +351,7 @@ struct Matrix : MatrixBase<T, N, M>
     /// Construct a diagonal matrix.
     /// \f[
     /// M_{m,n} = \begin{pmatrix}
-    /// x & 0 & \cdots & 0 \\
-    /// 0 & x & \cdots & 0 \\
-    /// \vdots & \vdots & \ddots & \vdots \\
-    /// 0 & 0 & \cdots & x
+    /// x & 0 & \cdots & 0 \\ 0 & x & \cdots & 0 \\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & x
     /// \end{pmatrix}
     /// \f]
     /// </summary>
@@ -456,7 +453,7 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::diagonal( U x ) noexcept
 {
     Matrix<T, N, M> res {};
 
-    for ( int i = 0; i < rank; ++i )
+    for ( std::size_t i = 0; i < rank; ++i )
         res.m[i * M + i] = static_cast<T>( x );
 
     return res;
@@ -490,7 +487,7 @@ template<typename T, std::size_t N, std::size_t M>
 template<ConvertibleTo<T> U>
 constexpr Matrix<T, N, M>::Matrix( U s ) noexcept
 {
-    for ( int i = 0; i < rank; ++i )
+    for ( std::size_t i = 0; i < rank; ++i )
         base::m[i * M + i] = static_cast<T>( s );
 }
 
@@ -500,7 +497,7 @@ constexpr Matrix<T, N, M>::Matrix( std::span<X, S> s ) noexcept
 {
     constexpr std::size_t c = std::min( N * M, s.size() );
 
-    for ( int i = 0; i < c; ++i )
+    for ( std::size_t i = 0; i < c; ++i )
         base::m[i] = static_cast<T>( s[i] );
 }
 
@@ -511,7 +508,7 @@ constexpr Matrix<T, N, M>::Matrix( std::initializer_list<X> l ) noexcept
     const std::size_t c = std::min( N * M, l.size() );
     const X*          x = std::data( l );
 
-    for ( int i = 0; i < c; ++i )
+    for ( std::size_t i = 0; i < c; ++i )
         base::m[i] = static_cast<T>( x[i] );
 }
 
@@ -522,11 +519,11 @@ constexpr Matrix<T, N, M>::Matrix( std::initializer_list<std::initializer_list<U
     std::size_t n = std::min( N, ll.size() );
     const auto  l = std::data( ll );
 
-    for ( int i = 0; i < n; ++i )
+    for ( std::size_t i = 0; i < n; ++i )
     {
         const std::size_t m = std::min( M, l[i].size() );
         const U*          v = std::data( l[i] );
-        for ( int j = 0; j < m; ++j )
+        for ( std::size_t j = 0; j < m; ++j )
             base::m[i * M + j] = static_cast<T>( v[j] );
     }
 }
@@ -538,7 +535,7 @@ constexpr Matrix<T, N, M>::Matrix( std::initializer_list<Vector<U, M>> l ) noexc
     std::size_t         n = std::min( N, l.size() );
     const Vector<U, M>* v = std::data( l );
 
-    for ( int i = 0; i < n; ++i )
+    for ( std::size_t i = 0; i < n; ++i )
         base::row[i] = v[i];
 }
 
@@ -851,8 +848,8 @@ struct Matrix_Determinant<T, N, N>
     /// <returns></returns>
     static constexpr T c( std::size_t i, std::size_t j ) noexcept
     {
-        static constexpr T cofactor[] = { T( 1 ), T( -1 ) };
-        return cofactor[( i + j ) % 2];
+        // static constexpr T cofactor[] = { T( 1 ), T( -1 ) };
+        return ( i + j ) % 2 == 0 ? T( 1 ) : T( -1 );  // cofactor[( i + j ) % 2];
     }
 
     static constexpr T determinant( const Matrix<T, N, N>& m ) noexcept
@@ -929,8 +926,8 @@ struct Matrix_Inverse<T, N, N>
     /// <returns>The \f((i, j)\f) cofactor.</returns>
     static constexpr T c( std::size_t i, std::size_t j ) noexcept
     {
-        static constexpr T cofactor[] = { T( 1 ), T( -1 ) };
-        return cofactor[( i + j ) % 2];
+        // static constexpr T cofactor[] = { T( 1 ), T( -1 ) };
+        return ( i + j ) % 2 == 0 ? T( 1 ) : T( -1 );  // cofactor[( i + j ) % 2];
     }
 
     /// <summary>
@@ -979,10 +976,7 @@ constexpr Matrix<T, N, M> inverse( const Matrix<T, N, M>& m ) noexcept
 /// <summary>
 /// Construct a 4x4 translation matrix.
 /// \f[ \mathbf{T}_\mathbf{t} = \begin{bmatrix}
-/// 1 & 0 & 0 & t_x \\
-/// 0 & 1 & 0 & t_y \\
-/// 0 & 0 & 1 & t_z \\
-/// 0 & 0 & 0 & 1
+/// 1 & 0 & 0 & t_x \\ 0 & 1 & 0 & t_y \\ 0 & 0 & 1 & t_z \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1002,10 +996,7 @@ constexpr Matrix<T, 4, 4> translate( const Vector<T, 3>& t ) noexcept
 /// <summary>
 /// Construct a 4x4 scale matrix.
 /// \f[ \mathbf{S}_\mathbf{s} = \begin{bmatrix}
-/// s_x & 0 & 0 & 0 \\
-/// 0 & s_y & 0 & 0 \\
-/// 0 & 0 & s_z & 0 \\
-/// 0 & 0 & 0 & 1
+/// s_x & 0 & 0 & 0 \\ 0 & s_y & 0 & 0 \\ 0 & 0 & s_z & 0 \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1025,10 +1016,7 @@ constexpr Matrix<T, 4, 4> scale( const Vector<T, 3>& s ) noexcept
 /// <summary>
 /// Construct a matrix that performs a rotation about the X axis.
 /// \f[ \mathbf{R}_x = \begin{bmatrix}
-/// 1 & 0 & 0 & 0 \\
-/// 0 & \cos{\theta} & -\sin{\theta} & 0 \\
-/// 0 & \sin{\theta} & \cos{\theta} & 0 \\
-/// 0 & 0 & 0 & 1
+/// 1 & 0 & 0 & 0 \\ 0 & \cos{\theta} & -\sin{\theta} & 0 \\ 0 & \sin{\theta} & \cos{\theta} & 0 \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1051,10 +1039,7 @@ constexpr Matrix<T, 4, 4> rotateX( T angle ) noexcept
 /// <summary>
 /// Construct a matrix that performs a rotation about the Y axis.
 /// \f[ \mathbf{R}_y = \begin{bmatrix}
-/// \cos{\theta} & 0 & \sin{\theta} & 0 \\
-/// 0 & 1 & 0 & 0 \\
-/// -\sin{\theta} & 0 & \cos{\theta} & 0 \\
-/// 0 & 0 & 0 & 1
+/// \cos{\theta} & 0 & \sin{\theta} & 0 \\ 0 & 1 & 0 & 0 \\ -\sin{\theta} & 0 & \cos{\theta} & 0 \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1077,10 +1062,7 @@ constexpr Matrix<T, 4, 4> rotateY( T angle ) noexcept
 /// <summary>
 /// Construct a matrix that performs a rotation about the Z axis.
 /// \f[ \mathbf{R}_z = \begin{bmatrix}
-/// \cos{\theta} & -\sin{\theta} & 0 & 0 \\
-/// \sin{\theta} & \cos{\theta} & 0 & 0 \\
-/// 0 & 0 & 1 & 0 \\
-/// 0 & 0 & 0 & 1
+/// \cos{\theta} & -\sin{\theta} & 0 & 0 \\ \sin{\theta} & \cos{\theta} & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1103,10 +1085,7 @@ constexpr Matrix<T, 4, 4> rotateZ( T angle ) noexcept
 /// <summary>
 /// Construct a matrix that performs a rotation about an arbitrary axis (\f(\hat{\mathbf{v}}\f)).
 /// \f[ \mathbf{R}_{\hat{\mathbf{v}}\theta} = \begin{bmatrix}
-/// tx^2 + c & txy - sz & txz + sy & 0 \\
-/// txy + sz & ty^2 + c & tyz - sx & 0 \\
-/// txz - sy & tyz + sx & tz^2 + c & 0 \\
-/// 0 & 0 & 0 & 1
+/// tx^2 + c & txy - sz & txz + sy & 0 \\ txy + sz & ty^2 + c & tyz - sx & 0 \\ txz - sy & tyz + sx & tz^2 + c & 0 \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// Where:
 /// * \f(\hat{\mathbf{v}} = (x, y, z)\f)
@@ -1153,10 +1132,7 @@ constexpr Matrix<T, 4, 4> rotateAxisAngle( const Vector<T, 3>& axis, T angle ) n
 /// <summary>
 /// Creates a left-handed frustum projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{2n}{r-l} & 0 & -\frac{r+l}{r-l} & 0 \\
-/// 0 & \frac{2n}{t-b} & -\frac{t+b}{t-b} & 0 \\
-/// 0 & 0 & \frac{f}{f-n} & -\frac{fn}{f-n} \\
-/// 0 & 0 & 1 & 0
+/// \frac{2n}{r-l} & 0 & -\frac{r+l}{r-l} & 0 \\ 0 & \frac{2n}{t-b} & -\frac{t+b}{t-b} & 0 \\ 0 & 0 & \frac{f}{f-n} & -\frac{fn}{f-n} \\ 0 & 0 & 1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1188,10 +1164,7 @@ constexpr Matrix<T, 4, 4> frustumLH01( T l, T r, T b, T t, T n, T f ) noexcept
 /// <summary>
 /// Creates a left-handed frustum projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{2n}{r-l} & 0 & -\frac{r+l}{r-l} & 0 \\
-/// 0 & \frac{2n}{t-b} & -\frac{t+b}{t-b} & 0 \\
-/// 0 & 0 & \frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
-/// 0 & 0 & 1 & 0
+/// \frac{2n}{r-l} & 0 & -\frac{r+l}{r-l} & 0 \\ 0 & \frac{2n}{t-b} & -\frac{t+b}{t-b} & 0 \\ 0 & 0 & \frac{f+n}{f-n} & -\frac{2fn}{f-n} \\ 0 & 0 & 1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1223,10 +1196,7 @@ constexpr Matrix<T, 4, 4> frustumLH11( T l, T r, T b, T t, T n, T f ) noexcept
 /// <summary>
 /// Creates a right-handed frustum projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{2n}{r-l} & 0 & \frac{r+l}{r-l} & 0 \\
-/// 0 & \frac{2n}{t-b} & \frac{t+b}{t-b} & 0 \\
-/// 0 & 0 & -\frac{f}{f-n} & -\frac{fn}{f-n} \\
-/// 0 & 0 & -1 & 0
+/// \frac{2n}{r-l} & 0 & \frac{r+l}{r-l} & 0 \\ 0 & \frac{2n}{t-b} & \frac{t+b}{t-b} & 0 \\ 0 & 0 & -\frac{f}{f-n} & -\frac{fn}{f-n} \\ 0 & 0 & -1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1258,10 +1228,7 @@ constexpr Matrix<T, 4, 4> frustumRH01( T l, T r, T b, T t, T n, T f ) noexcept
 /// <summary>
 /// Creates a right-handed frustum projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{2n}{r-l} & 0 & \frac{r+l}{r-l} & 0 \\
-/// 0 & \frac{2n}{t-b} & \frac{t+b}{t-b} & 0 \\
-/// 0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
-/// 0 & 0 & -1 & 0
+/// \frac{2n}{r-l} & 0 & \frac{r+l}{r-l} & 0 \\ 0 & \frac{2n}{t-b} & \frac{t+b}{t-b} & 0 \\ 0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\ 0 & 0 & -1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1323,10 +1290,7 @@ constexpr Matrix<T, 4, 4> frustum( T l, T r, T b, T t, T n, T f ) noexcept
 /// <summary>
 /// Creates a left-handed orthographic projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\
-/// 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\
-/// 0 & 0 & \frac{1}{f-n} & -\frac{n}{f-n} \\
-/// 0 & 0 & 0 & 1
+/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\ 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\ 0 & 0 & \frac{1}{f-n} & -\frac{n}{f-n} \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1358,10 +1322,7 @@ constexpr Matrix<T, 4, 4> orthographicLH01( T l, T r, T b, T t, T n, T f ) noexc
 /// <summary>
 /// Creates a left-handed orthographic projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\
-/// 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\
-/// 0 & 0 & \frac{2}{f-n} & -\frac{f+n}{f-n} \\
-/// 0 & 0 & 0 & 1
+/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\ 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\ 0 & 0 & \frac{2}{f-n} & -\frac{f+n}{f-n} \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1393,10 +1354,7 @@ constexpr Matrix<T, 4, 4> orthographicLH11( T l, T r, T b, T t, T n, T f ) noexc
 /// <summary>
 /// Creates a right-handed orthographic projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\
-/// 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\
-/// 0 & 0 & -\frac{1}{f-n} & -\frac{n}{f-n} \\
-/// 0 & 0 & 0 & 1
+/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\ 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\ 0 & 0 & -\frac{1}{f-n} & -\frac{n}{f-n} \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1428,10 +1386,7 @@ constexpr Matrix<T, 4, 4> orthographicRH01( T l, T r, T b, T t, T n, T f ) noexc
 /// <summary>
 /// Creates a right-handed orthographic projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\
-/// 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\
-/// 0 & 0 & -\frac{2}{f-n} & -\frac{f+n}{f-n} \\
-/// 0 & 0 & 0 & 1
+/// \frac{2}{r-l} & 0 & 0 & -\frac{r+l}{r-l} \\ 0 & \frac{2}{t-b} & 0 & -\frac{t+b}{t-b} \\ 0 & 0 & -\frac{2}{f-n} & -\frac{f+n}{f-n} \\ 0 & 0 & 0 & 1
 /// \end{bmatrix} \f]
 /// </summary>
 /// <remarks>
@@ -1493,10 +1448,7 @@ constexpr Matrix<T, 4, 4> orthographic( T l, T r, T b, T t, T n, T f ) noexcept
 /// <summary>
 /// Create a left-handed perspective projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{d}{a} & 0 & 0 & 0 \\
-/// 0 & d & 0 & 0 \\
-/// 0 & 0 & \frac{f}{f-n} & -\frac{fn}{f-n} \\
-/// 0 & 0 & 1 & 0
+/// \frac{d}{a} & 0 & 0 & 0 \\ 0 & d & 0 & 0 \\ 0 & 0 & \frac{f}{f-n} & -\frac{fn}{f-n} \\ 0 & 0 & 1 & 0
 /// \end{bmatrix} \f]
 /// Where:
 /// * \f(a\f) is the aspect ratio
@@ -1528,10 +1480,7 @@ constexpr Matrix<T, 4, 4> perspectiveFoVLH01( T fovy, T aspectRatio, T n, T f ) 
 /// <summary>
 /// Create a left-handed perspective projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{d}{a} & 0 & 0 & 0 \\
-/// 0 & d & 0 & 0 \\
-/// 0 & 0 & \frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
-/// 0 & 0 & 1 & 0
+/// \frac{d}{a} & 0 & 0 & 0 \\ 0 & d & 0 & 0 \\ 0 & 0 & \frac{f+n}{f-n} & -\frac{2fn}{f-n} \\ 0 & 0 & 1 & 0
 /// \end{bmatrix} \f]
 /// Where:
 /// * \f(a\f) is the aspect ratio
@@ -1563,10 +1512,7 @@ constexpr Matrix<T, 4, 4> perspectiveFoVLH11( T fovy, T aspectRatio, T n, T f ) 
 /// <summary>
 /// Create a right-handed perspective projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{d}{a} & 0 & 0 & 0 \\
-/// 0 & d & 0 & 0 \\
-/// 0 & 0 & \frac{f}{n-f} & -\frac{fn}{f-n} \\
-/// 0 & 0 & -1 & 0
+/// \frac{d}{a} & 0 & 0 & 0 \\ 0 & d & 0 & 0 \\ 0 & 0 & \frac{f}{n-f} & -\frac{fn}{f-n} \\ 0 & 0 & -1 & 0
 /// \end{bmatrix} \f]
 /// Where:
 /// * \f(a\f) is the aspect ratio
@@ -1598,10 +1544,7 @@ constexpr Matrix<T, 4, 4> perspectiveFoVRH01( T fovy, T aspectRatio, T n, T f ) 
 /// <summary>
 /// Create a right-handed perspective projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{d}{a} & 0 & 0 & 0 \\
-/// 0 & d & 0 & 0 \\
-/// 0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
-/// 0 & 0 & -1 & 0
+/// \frac{d}{a} & 0 & 0 & 0 \\ 0 & d & 0 & 0 \\ 0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\ 0 & 0 & -1 & 0
 /// \end{bmatrix} \f]
 /// Where:
 /// * \f(a\f) is the aspect ratio
@@ -1661,10 +1604,7 @@ constexpr Matrix<T, 4, 4> perspectiveFoV( T fovy, T aspectRatio, T n, T f ) noex
 /// <summary>
 /// Create a left-handed perspective projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{2n}{w} & 0 & 0 & 0 \\
-/// 0 & \frac{2n}{h} & 0 & 0 \\
-/// 0 & 0 & \frac{f}{f-n} & -\frac{fn}{f-n} \\
-/// 0 & 0 & 1 & 0
+/// \frac{2n}{w} & 0 & 0 & 0 \\ 0 & \frac{2n}{h} & 0 & 0 \\ 0 & 0 & \frac{f}{f-n} & -\frac{fn}{f-n} \\ 0 & 0 & 1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1691,10 +1631,7 @@ constexpr Matrix<T, 4, 4> perspectiveLH01( T w, T h, T n, T f ) noexcept
 /// <summary>
 /// Create a left-handed perspective projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{2n}{w} & 0 & 0 & 0 \\
-/// 0 & \frac{2n}{h} & 0 & 0 \\
-/// 0 & 0 & \frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
-/// 0 & 0 & 1 & 0
+/// \frac{2n}{w} & 0 & 0 & 0 \\ 0 & \frac{2n}{h} & 0 & 0 \\ 0 & 0 & \frac{f+n}{f-n} & -\frac{2fn}{f-n} \\ 0 & 0 & 1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1721,10 +1658,7 @@ constexpr Matrix<T, 4, 4> perspectiveLH11( T w, T h, T n, T f ) noexcept
 /// <summary>
 /// Create a right-handed perspective projection matrix that maps depth values to the range \f([0 \ldots 1]\f).
 /// \f[ \mathbf{P}_{0,1} = \begin{bmatrix}
-/// \frac{2n}{w} & 0 & 0 & 0 \\
-/// 0 & \frac{2n}{h} & 0 & 0 \\
-/// 0 & 0 & -\frac{f}{f-n} & -\frac{fn}{f-n} \\
-/// 0 & 0 & -1 & 0
+/// \frac{2n}{w} & 0 & 0 & 0 \\ 0 & \frac{2n}{h} & 0 & 0 \\ 0 & 0 & -\frac{f}{f-n} & -\frac{fn}{f-n} \\ 0 & 0 & -1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1751,10 +1685,7 @@ constexpr Matrix<T, 4, 4> perspectiveRH01( T w, T h, T n, T f ) noexcept
 /// <summary>
 /// Create a right-handed perspective projection matrix that maps depth values to the range \f([-1 \ldots 1]\f).
 /// \f[ \mathbf{P}_{-1,1} = \begin{bmatrix}
-/// \frac{2n}{w} & 0 & 0 & 0 \\
-/// 0 & \frac{2n}{h} & 0 & 0 \\
-/// 0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\
-/// 0 & 0 & -1 & 0
+/// \frac{2n}{w} & 0 & 0 & 0 \\ 0 & \frac{2n}{h} & 0 & 0 \\ 0 & 0 & -\frac{f+n}{f-n} & -\frac{2fn}{f-n} \\ 0 & 0 & -1 & 0
 /// \end{bmatrix} \f]
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
@@ -1939,8 +1870,8 @@ constexpr Matrix<T, N, M> operator*( U lhs, const Matrix<T, N, M>& rhs ) noexcep
 {
     Matrix<T, N, M> res;
 
-    for ( int i = 0; i < N; ++i )
-        for ( int j = 0; j < M; ++j )
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
             res.m[i * M + j] = static_cast<T>( lhs ) * rhs.m[i * M + j];
 
     return res;
@@ -1951,8 +1882,8 @@ Vector<T, M> operator*( const Vector<T, N>& lhs, const Matrix<U, N, M>& rhs ) no
 {
     Vector<T, M> res;
 
-    for ( int j = 0; j < M; ++j )
-        for ( int i = 0; i < N; ++i )
+    for ( std::size_t j = 0; j < M; ++j )
+        for ( std::size_t i = 0; i < N; ++i )
             res.vec[j] += lhs.vec[i] * static_cast<T>( rhs.m[i * M + j] );
 
     return res;

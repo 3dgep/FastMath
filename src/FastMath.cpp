@@ -1,43 +1,44 @@
-#include <FastMath/Vector.hpp>
 #include <FastMath/Matrix.hpp>
 #include <FastMath/Quaternion.hpp>
 #include <FastMath/Transform.hpp>
+#include <FastMath/Vector.hpp>
 
-using namespace FastMath;
-
+namespace FastMath {
 // Explicit template instantiation.
-template Vector2f;
-template Vector2d;
-template Vector2i;
-template Vector2u;
+template struct Vector<float, 2>;
+template struct Vector<double, 2>;
+template struct Vector<int, 2>;
+template struct Vector<unsigned, 2>;
 
-template Vector3f;
-template Vector3d;
-template Vector3i;
-template Vector3u;
+template struct Vector<float, 3>;
+template struct Vector<double, 3>;
+template struct Vector<int, 3>;
+template struct Vector<unsigned, 3>;
 
-template Vector4f;
-template Vector4d;
-template Vector4i;
-template Vector4u;
+template struct Vector<float, 4>;
+template struct Vector<double, 4>;
+template struct Vector<int, 4>;
+template struct Vector<unsigned, 4>;
 
-template Matrix2f;
-template Matrix2d;
-template Matrix2i;
-template Matrix2u;
+template struct Matrix<float, 2>;
+template struct Matrix<double, 2>;
+template struct Matrix<int, 2>;
+template struct Matrix<unsigned, 2>;
 
-template Matrix3f;
-template Matrix3d;
-template Matrix3i;
-template Matrix3u;
+template struct Matrix<float, 3>;
+template struct Matrix<double, 3>;
+template struct Matrix<int, 3>;
+template struct Matrix<unsigned, 3>;
 
-template Matrix4f;
-template Matrix4d;
-template Matrix4i;
-template Matrix4u;
+template struct Matrix<float, 4>;
+template struct Matrix<double, 4>;
+template struct Matrix<int, 4>;
+template struct Matrix<unsigned, 4>;
 
-template QuaternionF;
-template QuaternionD;
+template struct Quaternion<float>;
+template struct Quaternion<double>;
 
-template TransformF;
-template TransformD;
+template struct Transform<float>;
+template struct Transform<double>;
+
+}

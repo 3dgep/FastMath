@@ -465,7 +465,7 @@ template<typename T, std::size_t N>
 template<ConvertibleTo<T> X>
 constexpr Vector<T, N>::Vector( X s ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         base::vec[i] = static_cast<T>( s );
 }
 
@@ -514,7 +514,7 @@ constexpr Vector<T, N>::Vector( std::span<U, M> s ) noexcept
 {
     const std::size_t c = std::min( N, s.size() );
 
-    for ( int i = 0; i < c; ++i )
+    for ( std::size_t i = 0; i < c; ++i )
         base::vec[i] = static_cast<T>( s[i] );
 }
 
@@ -524,7 +524,7 @@ constexpr Vector<T, N>::Vector( const Vector<U, M>& copy, const Args&... args ) 
 {
     constexpr std::size_t c = std::min( N, M );
 
-    int i = 0;
+    std::size_t i = 0;
     for ( ; i < c; ++i )
         base::vec[i] = static_cast<T>( copy.vec[i] );
 
@@ -540,7 +540,7 @@ constexpr Vector<T, N>::Vector( X x, const Vector<U, M>& copy )
 
     base::vec[0] = static_cast<T>( x );
 
-    for ( int i = 1; i < c; ++i )
+    for ( std::size_t i = 1; i < c; ++i )
         base::vec[i] = static_cast<T>( copy.vec[i - 1] );
 }
 template<typename T, std::size_t N>
@@ -554,7 +554,7 @@ constexpr Vector<T, N>::Vector( X x, Y y, const Vector<U, M>& copy )
     if constexpr ( N > 1 )
         base::vec[1] = static_cast<T>( y );
 
-    for ( int i = 2; i < c; ++i )
+    for ( std::size_t i = 2; i < c; ++i )
         base::vec[i] = static_cast<T>( copy.vec[i - 2] );
 }
 
@@ -572,7 +572,7 @@ constexpr Vector<T, N>::Vector( X x, Y y, Z z, const Vector<U, M>& copy )
     if constexpr ( N > 2 )
         base::vec[2] = static_cast<T>( z );
 
-    for ( int i = 3; i < c; ++i )
+    for ( std::size_t i = 3; i < c; ++i )
         base::vec[i] = static_cast<T>( copy.vec[i - 3] );
 }
 
@@ -593,7 +593,7 @@ constexpr Vector<T, N>::Vector( X x, Y y, Z z, W w, const Vector<U, M>& copy )
     if constexpr ( N > 3 )
         base::vec[3] = static_cast<T>( w );
 
-    for ( int i = 4; i < c; ++i )
+    for ( std::size_t i = 4; i < c; ++i )
         base::vec[i] = static_cast<T>( copy.vec[i - 4] );
 }
 
@@ -617,7 +617,7 @@ constexpr Vector<T, N>& Vector<T, N>::operator=( const Vector<U, M>& rhs ) noexc
 {
     constexpr std::size_t c = std::min( N, M );
 
-    for ( int i = 0; i < c; ++i )
+    for ( std::size_t i = 0; i < c; ++i )
         base::vec[i] = static_cast<T>( rhs[i] );
 
     return *this;
@@ -635,7 +635,7 @@ constexpr Vector<T, N> Vector<T, N>::operator-() const noexcept
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = -base::vec[i];
 
     return res;
@@ -646,7 +646,7 @@ constexpr Vector<T, N> Vector<T, N>::operator+( const Vector<T, N>& rhs ) const 
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = base::vec[i] + rhs.vec[i];
 
     return res;
@@ -655,7 +655,7 @@ constexpr Vector<T, N> Vector<T, N>::operator+( const Vector<T, N>& rhs ) const 
 template<typename T, std::size_t N>
 constexpr Vector<T, N>& Vector<T, N>::operator+=( const Vector<T, N>& rhs ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         base::vec[i] += rhs.vec[i];
 
     return *this;
@@ -666,7 +666,7 @@ constexpr Vector<T, N> Vector<T, N>::operator-( const Vector<T, N>& rhs ) const 
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = base::vec[i] - rhs.vec[i];
 
     return res;
@@ -675,7 +675,7 @@ constexpr Vector<T, N> Vector<T, N>::operator-( const Vector<T, N>& rhs ) const 
 template<typename T, std::size_t N>
 constexpr Vector<T, N>& Vector<T, N>::operator-=( const Vector<T, N>& rhs ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         base::vec[i] -= rhs.vec[i];
 
     return *this;
@@ -686,7 +686,7 @@ constexpr Vector<T, N> Vector<T, N>::operator*( const Vector<T, N>& rhs ) const 
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = base::vec[i] * rhs.vec[i];
 
     return res;
@@ -695,7 +695,7 @@ constexpr Vector<T, N> Vector<T, N>::operator*( const Vector<T, N>& rhs ) const 
 template<typename T, std::size_t N>
 constexpr Vector<T, N>& Vector<T, N>::operator*=( const Vector<T, N>& rhs ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         base::vec[i] *= rhs.vec[i];
 
     return *this;
@@ -707,7 +707,7 @@ constexpr Vector<T, N> Vector<T, N>::operator*( U s ) const noexcept
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = base::vec[i] * static_cast<T>( s );
 
     return res;
@@ -717,7 +717,7 @@ template<typename T, std::size_t N>
 template<ConvertibleTo<T> U>
 constexpr Vector<T, N>& Vector<T, N>::operator*=( U s ) noexcept
 {
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         base::vec[i] *= static_cast<T>( s );
 
     return *this;
@@ -731,7 +731,7 @@ constexpr Vector<T, N> Vector<T, N>::operator/( U s ) const noexcept
 
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = base::vec[i] / static_cast<T>( s );
 
     return res;
@@ -743,7 +743,7 @@ constexpr Vector<T, N>& Vector<T, N>::operator/=( U s ) noexcept
 {
     assert( s != U( 0 ) );
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         base::vec[i] /= static_cast<T>( s );
 
     return *this;
@@ -754,7 +754,7 @@ constexpr auto Vector<T, N>::operator<=>( const Vector<T, N>& rhs ) const noexce
 {
     auto res = base::vec[0] <=> rhs.vec[0];
 
-    for ( int i = 1; i < N && res == 0; ++i )
+    for ( std::size_t i = 1; i < N && res == 0; ++i )
         res = base::vec[i] <=> rhs.vec[i];
 
     return res;
@@ -765,7 +765,7 @@ constexpr bool Vector<T, N>::operator==( const Vector<T, N>& rhs ) const noexcep
 {
     bool res = base::vec[0] == rhs.vec[0];
 
-    for ( int i = 1; i < N && res; ++i )
+    for ( std::size_t i = 1; i < N && res; ++i )
         res = base::vec[i] == rhs.vec[i];
 
     return res;
@@ -820,7 +820,7 @@ struct Vector_Dot
     {
         T res = T( 0 );
 
-        for ( int i = 0; i < N; ++i )
+        for ( std::size_t i = 0; i < N; ++i )
             res += a.vec[i] * b.vec[i];
 
         return res;
@@ -971,7 +971,7 @@ constexpr Vector<T, N> abs( const Vector<T, N>& v ) noexcept
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = std::abs( v.vec[i] );
 
     return res;
@@ -989,7 +989,7 @@ constexpr Vector<bool, N> lessThan( const Vector<T, N>& a, const Vector<T, N>& b
 {
     Vector<bool, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = a.vec[i] < b.vec[i];
 
     return res;
@@ -1007,7 +1007,7 @@ constexpr Vector<bool, N> lessThanEqual( const Vector<T, N>& a, const Vector<T, 
 {
     Vector<bool, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = a.vec[i] <= b.vec[i];
 
     return res;
@@ -1025,7 +1025,7 @@ constexpr Vector<bool, N> greaterThan( const Vector<T, N>& a, const Vector<T, N>
 {
     Vector<bool, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = a.vec[i] > b.vec[i];
 
     return res;
@@ -1043,7 +1043,7 @@ constexpr Vector<bool, N> greaterThanEqual( const Vector<T, N>& a, const Vector<
 {
     Vector<bool, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = a.vec[i] >= b.vec[i];
 
     return res;
@@ -1059,7 +1059,7 @@ constexpr bool any( const Vector<bool, N>& v ) noexcept
 {
     bool res = false;
 
-    for ( int i = 0; i < N && !res; ++i )
+    for ( std::size_t i = 0; i < N && !res; ++i )
         res = res || v.vec[i];
 
     return res;
@@ -1075,7 +1075,7 @@ constexpr bool all( const Vector<bool, N>& v ) noexcept
 {
     bool res = true;
 
-    for ( int i = 0; i < N && res; ++i )
+    for ( std::size_t i = 0; i < N && res; ++i )
         res = res && v.vec[i];
 
     return res;
@@ -1091,7 +1091,7 @@ constexpr Vector<bool, N> negate( const Vector<bool, N>& v ) noexcept
 {
     Vector<bool, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = !v.vec[i];
 
     return res;
@@ -1141,7 +1141,7 @@ struct Vector_Functor1
     {
         Vector<R, N> res;
 
-        for ( int i = 0; i < N; ++i )
+        for ( std::size_t i = 0; i < N; ++i )
             res.vec[i] = func( v.vec[i] );
 
         return res;
@@ -1169,7 +1169,7 @@ struct Vector_Functor2
     {
         Vector<R, N> res;
 
-        for ( int i = 0; i < N; ++i )
+        for ( std::size_t i = 0; i < N; ++i )
             res.vec[i] = func( a.vec[i], b.vec[i] );
 
         return res;
@@ -1354,7 +1354,7 @@ Vector<T, N> operator*( U lhs, const Vector<T, N>& rhs ) noexcept
 {
     Vector<T, N> res;
 
-    for ( int i = 0; i < N; ++i )
+    for ( std::size_t i = 0; i < N; ++i )
         res.vec[i] = static_cast<T>( lhs ) * rhs.vec[i];
 
     return res;
