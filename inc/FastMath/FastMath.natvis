@@ -24,12 +24,12 @@
 			<Item Name="w">w</Item>
 		</Expand>
 	</Type>
-	<Type Name="FastMath::MatrixBase&lt;*, 4, 4&gt;">
+	<Type Name="FastMath::MatrixBase&lt;*, *, *&gt;">
 		<Expand>
-			<Item Name="X">X</Item>
-			<Item Name="Y">Y</Item>
-			<Item Name="Z">Z</Item>
-			<Item Name="W">W</Item>
+			<ArrayItems>
+				<Size>$T2</Size>
+				<ValuePointer>row</ValuePointer>
+			</ArrayItems>
 		</Expand>
 	</Type>
 	<Type Name="FastMath::QuaternionBase&lt;*&gt;">

@@ -14,8 +14,6 @@ add_executable( ${TARGET_NAME}
     ${SRC}
 )
 
-target_include_directories(
-    ${TARGET_NAME}
-    PRIVATE
-        ${CMAKE_SOURCE_DIR}/inc
-)
+target_compile_options( ${TARGET_NAME} PRIVATE ${FM_WARNINGS} )
+
+target_link_libraries( ${TARGET_NAME} PRIVATE FastMath::FastMath )

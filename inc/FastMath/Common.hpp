@@ -2,6 +2,7 @@
 
 #include "Concepts.hpp"
 
+#include <cmath>
 #include <cstdint>
 #include <limits>
 
@@ -67,6 +68,21 @@ template<FloatingPoint T>
 constexpr T radians( const T degrees ) noexcept
 {
     return degrees * ( PI<T> / T( 180.0 ) );
+}
+
+/// <summary>
+/// Apply a dead zone to a value (for example, an analog stick axis).
+/// </summary>
+/// <param name="val">The value to apply the dead zone to.</param>
+/// <param name="threshold">Values with a magnitude less than this are clamped to 0.</param>
+/// <returns>`0` if the magnitude of `val` is less than `threshold`, otherwise `val`.</returns>
+template<Arithmetic T>
+constexpr T deadzone( T val, T threshold ) noexcept
+{
+    if ( std::abs( val ) < threshold )
+        return T( 0 );
+
+    return val;
 }
 
 /// <summary>

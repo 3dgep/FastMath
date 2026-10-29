@@ -4,6 +4,8 @@
 
 #include <cassert>
 #include <compare>
+#include <initializer_list>
+#include <utility>
 
 namespace FastMath
 {
@@ -212,16 +214,6 @@ struct Matrix : MatrixBase<T, N, M>
         requires IsSigned<T>;
 
     /// <summary>
-    /// Add this matrix to another:
-    /// \f[
-    /// \mathbf{M}_{ij} = \mathbf{A}_{ij} + \mathbf{B}_{ij}
-    /// \f]
-    /// </summary>
-    /// <param name="rhs">The matrix on the right-hand side of the `+` operator.</param>
-    /// <returns>The result of adding this matrix to another.</returns>
-    constexpr Matrix<T, N, M> operator+( const Matrix<T, N, M>& rhs ) const noexcept;
-
-    /// <summary>
     /// Add this matrix and another and assign the result back to this matrix.
     /// \f[
     /// \mathbf{M}_{ij} = \mathbf{M}_{ij} + \mathbf{A}_{ij}
@@ -232,16 +224,6 @@ struct Matrix : MatrixBase<T, N, M>
     constexpr Matrix<T, N, M>& operator+=( const Matrix<T, N, M>& rhs ) noexcept;
 
     /// <summary>
-    /// Subtract a matrix from this matrix.
-    /// \f[
-    /// \mathbf{M}_{ij} = \mathbf{A}_{ij} - \mathbf{B}_{ij}
-    /// \f]
-    /// </summary>
-    /// <param name="rhs">The matrix to subtract from this one.</param>
-    /// <returns>The result of subtracting a matrix from this matrix.</returns>
-    constexpr Matrix<T, N, M> operator-( const Matrix<T, N, M>& rhs ) const noexcept;
-
-    /// <summary>
     /// Subtract a matrix from this matrix and store the result in this matrix.
     /// \f[
     /// \mathbf{M}_{ij} = \mathbf{M}_{ij} - \mathbf{A}_{ij}
@@ -250,17 +232,6 @@ struct Matrix : MatrixBase<T, N, M>
     /// <param name="rhs">The matrix to subtract from this matrix.</param>
     /// <returns>A reference to this matrix.</returns>
     constexpr Matrix<T, N, M>& operator-=( const Matrix<T, N, M>& rhs ) noexcept;
-
-    /// <summary>
-    /// Scalar matrix multiplication. Each component of the matrix is multiplied by the
-    /// scalar \f(s\f).
-    /// \f[
-    /// \mathbf{M}_{ij} = s\mathbf{A}_{ij}
-    /// \f]
-    /// </summary>
-    /// <param name="s">The scalar to multiply.</param>
-    /// <returns>The result of multiplying this matrix by the scalar \f(s\f).</returns>
-    constexpr Matrix<T, N, M> operator*( T s ) const noexcept;
 
     /// <summary>
     /// Scalar matrix multiplication and assignment. Each component of this matrix is
@@ -274,50 +245,16 @@ struct Matrix : MatrixBase<T, N, M>
     constexpr Matrix<T, N, M>& operator*=( T s ) noexcept;
 
     /// <summary>
-    /// Scalar matrix division. Each component of the matrix is divided by the scalar
-    /// \f(s\f). \f[ \mathbf{M}_{ij} = \frac{\mathbf{A}_{ij}}{s} \f]
-    /// </summary>
-    /// <remarks>
-    /// s cannot be 0.
-    /// </remarks>
-    /// <param name="s">The scalar to divide each component of the matrix.</param>
-    /// <returns>The result of dividing this matrix by \f(s\f).</returns>
-    constexpr Matrix<T, N, M> operator/( T s ) const noexcept;
-
-    /// <summary>
     /// Scalar matrix division and assignment. Each component of the matrix is divided by
     /// the scalar \f(s\f) then assigned back to this matrix. \f[ \mathbf{M}_{ij} =
     /// \frac{\mathbf{A}_{ij}}{s} \f]
     /// </summary>
     /// <remarks>
-    /// s cannot be 0.
+    /// `s` must not be 0.
     /// </remarks>
     /// <param name="s">The scalar to divide each component of the matrix.</param>
     /// <returns>A reference to this matrix after scalar division.</returns>
     constexpr Matrix<T, N, M>& operator/=( T s ) noexcept;
-
-    /// <summary>
-    /// Pre-multiply this matrix with a column-vector (on the right).
-    /// \f[
-    /// \mathbf{v}^{\prime}_{i} = \sum_{k=1}^{m}\mathbf{M}_{ik}\mathbf{v}_{k}
-    /// \f]
-    /// </summary>
-    /// <param name="rhs">The column vector to multiply.</param>
-    /// <returns>The resulting row vector.</returns>
-    constexpr Vector<T, N> operator*( const Vector<T, M>& rhs ) const noexcept;
-
-    /// <summary>
-    /// Multiply this matrix by another.
-    /// If \f(\mathbf{A}\f) is an \f(n \times m\f) matrix and \f(\mathbf{B}\f) is an \f(m
-    /// \times p\f) matrix, then the resulting matrix is \f(n \times p\f). \f[
-    /// \mathbf{M}_{ij} = \sum_{k=1}^{m}\mathbf{A}_{ik}\mathbf{B}_{kj}
-    /// \f]
-    /// </summary>
-    /// <param name="rhs">The matrix to multiply with this one.</param>
-    /// <typeparam name="P">The number of columns in the right matrix.</typeparam>
-    /// <returns></returns>
-    template<std::size_t P>
-    constexpr Matrix<T, N, P> operator*( const Matrix<T, M, P>& rhs ) const noexcept;
 
     /// <summary>
     /// Multiply this matrix by another and store the result in this matrix.
@@ -333,19 +270,159 @@ struct Matrix : MatrixBase<T, N, M>
     /// <returns>A reference to this matrix after multiplication.</returns>
     constexpr Matrix<T, N, M>& operator*=( const Matrix<T, M, M>& rhs ) noexcept;
 
+    // The binary operators are hidden friends: they are only found by argument-dependent lookup
+    // when one of the operands is a Matrix<T, N, M>. This keeps overload resolution (and compile errors)
+    // small, and allows the scalar to be on either side of the operator.
+
     /// <summary>
-    /// Compare this matrix to another.
+    /// Add two matrices:
+    /// \f[
+    /// \mathbf{M}_{ij} = \mathbf{A}_{ij} + \mathbf{B}_{ij}
+    /// \f]
     /// </summary>
-    /// <param name="rhs">The matrix to compare with this one.</param>
-    /// <returns>The relative order of the non-equivalent elements.</returns>
-    constexpr auto operator<=>( const Matrix<T, N, M>& rhs ) const noexcept = default;
+    /// <param name="lhs">The matrix on the left-hand side of the `+` operator.</param>
+    /// <param name="rhs">The matrix on the right-hand side of the `+` operator.</param>
+    /// <returns>The result of adding the two matrices.</returns>
+    friend constexpr Matrix<T, N, M> operator+( Matrix<T, N, M> lhs, const Matrix<T, N, M>& rhs ) noexcept
+    {
+        return lhs += rhs;
+    }
+
+    /// <summary>
+    /// Subtract two matrices.
+    /// \f[
+    /// \mathbf{M}_{ij} = \mathbf{A}_{ij} - \mathbf{B}_{ij}
+    /// \f]
+    /// </summary>
+    /// <param name="lhs">The matrix to subtract from.</param>
+    /// <param name="rhs">The matrix to subtract.</param>
+    /// <returns>The result of subtracting `rhs` from `lhs`.</returns>
+    friend constexpr Matrix<T, N, M> operator-( Matrix<T, N, M> lhs, const Matrix<T, N, M>& rhs ) noexcept
+    {
+        return lhs -= rhs;
+    }
+
+    /// <summary>
+    /// Scalar matrix multiplication. Each component of the matrix is multiplied by the
+    /// scalar \f(s\f).
+    /// \f[
+    /// \mathbf{M}_{ij} = s\mathbf{A}_{ij}
+    /// \f]
+    /// </summary>
+    /// <param name="lhs">The matrix.</param>
+    /// <param name="s">The scalar to multiply.</param>
+    /// <returns>The result of multiplying the matrix by the scalar \f(s\f).</returns>
+    friend constexpr Matrix<T, N, M> operator*( Matrix<T, N, M> lhs, T s ) noexcept
+    {
+        return lhs *= s;
+    }
+
+    /// <summary>
+    /// Scalar matrix multiplication. Each component of the matrix is multiplied by the
+    /// scalar \f(s\f).
+    /// \f[
+    /// \mathbf{M}_{ij} = s\mathbf{A}_{ij}
+    /// \f]
+    /// </summary>
+    /// <param name="s">The scalar to multiply.</param>
+    /// <param name="rhs">The matrix.</param>
+    /// <returns>The result of multiplying the matrix by the scalar \f(s\f).</returns>
+    friend constexpr Matrix<T, N, M> operator*( T s, Matrix<T, N, M> rhs ) noexcept
+    {
+        return rhs *= s;
+    }
+
+    /// <summary>
+    /// Scalar matrix division. Each component of the matrix is divided by the scalar
+    /// \f(s\f). \f[ \mathbf{M}_{ij} = \frac{\mathbf{A}_{ij}}{s} \f]
+    /// </summary>
+    /// <remarks>
+    /// `s` must not be 0.
+    /// </remarks>
+    /// <param name="lhs">The matrix.</param>
+    /// <param name="s">The scalar to divide each component of the matrix.</param>
+    /// <returns>The result of dividing the matrix by \f(s\f).</returns>
+    friend constexpr Matrix<T, N, M> operator/( Matrix<T, N, M> lhs, T s ) noexcept
+    {
+        return lhs /= s;
+    }
+
+    /// <summary>
+    /// Multiply a matrix with a column-vector (on the right).
+    /// \f[
+    /// \mathbf{v}^{\prime}_{i} = \sum_{k=1}^{m}\mathbf{M}_{ik}\mathbf{v}_{k}
+    /// \f]
+    /// </summary>
+    /// <param name="lhs">The matrix.</param>
+    /// <param name="rhs">The column vector to multiply.</param>
+    /// <returns>The resulting column vector.</returns>
+    friend constexpr Vector<T, N> operator*( const Matrix<T, N, M>& lhs, const Vector<T, M>& rhs ) noexcept
+    {
+        Vector<T, N> res;
+
+        for ( std::size_t i = 0; i < N; ++i )
+            res[i] = dot( lhs.row[i], rhs );
+
+        return res;
+    }
+
+    /// <summary>
+    /// Multiply a row-vector (on the left) with a matrix.
+    /// \f[
+    /// \mathbf{v}^{\prime}_{j} = \sum_{k=1}^{n}\mathbf{v}_{k}\mathbf{M}_{kj}
+    /// \f]
+    /// </summary>
+    /// <param name="lhs">The row vector to multiply.</param>
+    /// <param name="rhs">The matrix.</param>
+    /// <returns>The resulting row vector.</returns>
+    friend constexpr Vector<T, M> operator*( const Vector<T, N>& lhs, const Matrix<T, N, M>& rhs ) noexcept
+    {
+        Vector<T, M> res;
+
+        for ( std::size_t i = 0; i < N; ++i )
+            res += lhs[i] * rhs.row[i];
+
+        return res;
+    }
+
+    /// <summary>
+    /// Multiply two matrices.
+    /// If \f(\mathbf{A}\f) is an \f(n \times m\f) matrix and \f(\mathbf{B}\f) is an \f(m
+    /// \times p\f) matrix, then the resulting matrix is \f(n \times p\f). \f[
+    /// \mathbf{M}_{ij} = \sum_{k=1}^{m}\mathbf{A}_{ik}\mathbf{B}_{kj}
+    /// \f]
+    /// </summary>
+    /// <typeparam name="P">The number of columns in the right matrix.</typeparam>
+    /// <param name="lhs">The matrix on the left.</param>
+    /// <param name="rhs">The matrix on the right.</param>
+    /// <returns>The \f(n \times p\f) product of the two matrices.</returns>
+    template<std::size_t P>
+    friend constexpr Matrix<T, N, P> operator*( const Matrix<T, N, M>& lhs, const Matrix<T, M, P>& rhs ) noexcept
+    {
+        Matrix<T, N, P> res {};
+
+        for ( std::size_t i = 0; i < N; ++i )
+            for ( std::size_t j = 0; j < P; ++j )
+                for ( std::size_t k = 0; k < M; ++k )
+                    res.row[i][j] += lhs.row[i][k] * rhs.row[k][j];
+
+        return res;
+    }
 
     /// <summary>
     /// Check if two matrices are the same.
     /// </summary>
-    /// <param name="rhs">The matrix to compare with this one.</param>
+    /// <param name="lhs">The first matrix to compare.</param>
+    /// <param name="rhs">The second matrix to compare.</param>
     /// <returns>`true` if the matrices are equal, `false` otherwise.</returns>
-    constexpr bool operator==( const Matrix<T, N, M>& rhs ) const noexcept;
+    friend constexpr bool operator==( const Matrix<T, N, M>& lhs, const Matrix<T, N, M>& rhs ) noexcept
+    {
+        for ( std::size_t i = 0; i < N; ++i )
+            if ( lhs.row[i] != rhs.row[i] )
+                return false;
+
+        return true;
+    }
 
     /// <summary>
     /// Construct a diagonal matrix.
@@ -435,7 +512,7 @@ using mat4x4 = Matrix<float, 4, 4>;
 using dmat2   = Matrix<double, 2>;
 using dmat2x2 = Matrix<double, 2, 2>;
 using dmat2x3 = Matrix<double, 2, 3>;
-using dmat2x4 = Matrix<double, 2, 3>;
+using dmat2x4 = Matrix<double, 2, 4>;
 
 using dmat3   = Matrix<double, 3>;
 using dmat3x2 = Matrix<double, 3, 2>;
@@ -454,13 +531,10 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::diagonal( U x ) noexcept
     Matrix<T, N, M> res {};
 
     for ( std::size_t i = 0; i < rank; ++i )
-        res.m[i * M + i] = static_cast<T>( x );
+        res.row[i][i] = static_cast<T>( x );
 
     return res;
 }
-
-template<typename T, std::size_t N, std::size_t M>
-inline const Matrix<T, N, M> Matrix<T, N, M>::IDENTITY = diagonal<T>();
 
 template<typename T, std::size_t N, std::size_t M>
 constexpr std::size_t Matrix<T, N, M>::size() const noexcept
@@ -471,13 +545,15 @@ constexpr std::size_t Matrix<T, N, M>::size() const noexcept
 template<typename T, std::size_t N, std::size_t M>
 constexpr T* Matrix<T, N, M>::data() noexcept
 {
-    return &base::m[0];
+    static_assert( sizeof( Matrix<T, N, M> ) == N * M * sizeof( T ), "The elements must be tightly packed." );
+    return &base::row[0][0];
 }
 
 template<typename T, std::size_t N, std::size_t M>
 constexpr const T* Matrix<T, N, M>::data() const noexcept
 {
-    return &base::m[0];
+    static_assert( sizeof( Matrix<T, N, M> ) == N * M * sizeof( T ), "The elements must be tightly packed." );
+    return &base::row[0][0];
 }
 
 template<typename T, std::size_t N, std::size_t M>
@@ -488,7 +564,7 @@ template<ConvertibleTo<T> U>
 constexpr Matrix<T, N, M>::Matrix( U s ) noexcept
 {
     for ( std::size_t i = 0; i < rank; ++i )
-        base::m[i * M + i] = static_cast<T>( s );
+        base::row[i][i] = static_cast<T>( s );
 }
 
 template<typename T, std::size_t N, std::size_t M>
@@ -497,8 +573,11 @@ constexpr Matrix<T, N, M>::Matrix( std::span<X, S> s ) noexcept
 {
     constexpr std::size_t c = std::min( N * M, s.size() );
 
-    for ( std::size_t i = 0; i < c; ++i )
-        base::m[i] = static_cast<T>( s[i] );
+    // The inner loop has a constant trip count, so the column index is known at compile time after unrolling.
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
+            if ( i * M + j < c )
+                base::row[i][j] = static_cast<T>( s[i * M + j] );
 }
 
 template<typename T, std::size_t N, std::size_t M>
@@ -508,8 +587,11 @@ constexpr Matrix<T, N, M>::Matrix( std::initializer_list<X> l ) noexcept
     const std::size_t c = std::min( N * M, l.size() );
     const X*          x = std::data( l );
 
-    for ( std::size_t i = 0; i < c; ++i )
-        base::m[i] = static_cast<T>( x[i] );
+    // The inner loop has a constant trip count, so the column index is known at compile time after unrolling.
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
+            if ( i * M + j < c )
+                base::row[i][j] = static_cast<T>( x[i * M + j] );
 }
 
 template<typename T, std::size_t N, std::size_t M>
@@ -524,7 +606,7 @@ constexpr Matrix<T, N, M>::Matrix( std::initializer_list<std::initializer_list<U
         const std::size_t m = std::min( M, l[i].size() );
         const U*          v = std::data( l[i] );
         for ( std::size_t j = 0; j < m; ++j )
-            base::m[i * M + j] = static_cast<T>( v[j] );
+            base::row[i][j] = static_cast<T>( v[j] );
     }
 }
 
@@ -548,24 +630,36 @@ constexpr Matrix<T, N, M>::Matrix( const Matrix<X, I, J>& copy ) noexcept
 
     for ( std::size_t i = 0; i < n; ++i )
         for ( std::size_t j = 0; j < m; ++j )
-            base::m[i * M + j] = static_cast<T>( copy.m[i * J + j] );
+            base::row[i][j] = static_cast<T>( copy.row[i][j] );
 
     for ( std::size_t k = std::min( n, m ); k < rank; ++k )
-        base::m[k * M + k] = T( 1 );
+        base::row[k][k] = T( 1 );
 }
 
 template<typename T, std::size_t N, std::size_t M>
 template<ConvertibleTo<T> U>
 constexpr Matrix<T, N, M>::Matrix( const Matrix<U, N + 1, M + 1>& copy, std::size_t i, std::size_t j ) noexcept
 {
-    std::size_t c = 0;
-    for ( std::size_t row = 0; row <= N; ++row )
-        for ( std::size_t col = 0; col <= M; ++col )
+    std::size_t dstRow = 0;
+    for ( std::size_t srcRow = 0; srcRow <= N; ++srcRow )
+    {
+        if ( srcRow == i )
+            continue;
+
+        std::size_t dstCol = 0;
+        for ( std::size_t srcCol = 0; srcCol <= M; ++srcCol )
         {
-            if ( row != i && col != j )
-                base::m[c++] = static_cast<T>( copy.m[row * ( M + 1 ) + col] );
+            if ( srcCol != j )
+                base::row[dstRow][dstCol++] = static_cast<T>( copy.row[srcRow][srcCol] );
         }
+
+        ++dstRow;
+    }
 }
+
+// IDENTITY is defined after the constructors so it can be evaluated at compile time.
+template<typename T, std::size_t N, std::size_t M>
+inline constexpr Matrix<T, N, M> Matrix<T, N, M>::IDENTITY = diagonal<T>();
 
 template<typename T, std::size_t N, std::size_t M>
 template<ConvertibleTo<T> U, std::size_t I, std::size_t J>
@@ -576,7 +670,7 @@ constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator=( const Matrix<U, I, J>& rh
 
     for ( std::size_t i = 0; i < n; ++i )
         for ( std::size_t j = 0; j < m; ++j )
-            base::m[i * M + j] = static_cast<T>( rhs.m[i * J + j] );
+            base::row[i][j] = static_cast<T>( rhs.row[i][j] );
 
     return *this;
 }
@@ -608,20 +702,7 @@ constexpr Matrix<T, N, M> Matrix<T, N, M>::operator-() const noexcept
     Matrix<T, N, M> res;
 
     for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            res.m[i * M + j] = -base::m[i * M + j];
-
-    return res;
-}
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Matrix<T, N, M> Matrix<T, N, M>::operator+( const Matrix<T, N, M>& rhs ) const noexcept
-{
-    Matrix<T, N, M> res;
-
-    for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            res.m[i * M + j] = base::m[i * M + j] + rhs.m[i * M + j];
+        res.row[i] = -base::row[i];
 
     return res;
 }
@@ -630,110 +711,38 @@ template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator+=( const Matrix<T, N, M>& rhs ) noexcept
 {
     for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            base::m[i * M + j] += rhs.m[i * M + j];
+        base::row[i] += rhs.row[i];
 
     return *this;
-}
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Matrix<T, N, M> Matrix<T, N, M>::operator-( const Matrix<T, N, M>& rhs ) const noexcept
-{
-    Matrix<T, N, M> res;
-
-    for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            res.m[i * M + j] = base::m[i * M + j] - rhs.m[i * M + j];
-
-    return res;
 }
 
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator-=( const Matrix<T, N, M>& rhs ) noexcept
 {
     for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            base::m[i * M + j] -= rhs.m[i * M + j];
+        base::row[i] -= rhs.row[i];
 
     return *this;
-}
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Matrix<T, N, M> Matrix<T, N, M>::operator*( T s ) const noexcept
-{
-    Matrix<T, N, M> res;
-
-    for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            res.m[i * M + j] = base::m[i * M + j] * s;
-
-    return res;
 }
 
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator*=( T s ) noexcept
 {
     for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            base::m[i * M + j] *= s;
+        base::row[i] *= s;
 
     return *this;
-}
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Matrix<T, N, M> Matrix<T, N, M>::operator/( T s ) const noexcept
-{
-    Matrix<T, N, M> res;
-
-    if ( s != T( 0 ) )
-    {
-        T s_inv = T( 1 ) / s;
-        for ( std::size_t i = 0; i < N; ++i )
-            for ( std::size_t j = 0; j < M; ++j )
-                res.m[i * M + j] = base::m[i * M + j] * s_inv;
-    }
-
-    return res;
 }
 
 template<typename T, std::size_t N, std::size_t M>
 constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator/=( T s ) noexcept
 {
-    if ( s != T( 0 ) )
-    {
-        T s_inv = T( 1 ) / s;
-        for ( std::size_t i = 0; i < N; ++i )
-            for ( std::size_t j = 0; j < M; ++j )
-                base::m[i * M + j] *= s_inv;
-    }
+    assert( s != T( 0 ) );
+
+    for ( std::size_t i = 0; i < N; ++i )
+        base::row[i] /= s;
 
     return *this;
-}
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Vector<T, N> Matrix<T, N, M>::operator*( const Vector<T, M>& rhs ) const noexcept
-{
-    Vector<T, N> res;
-
-    for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            res.vec[i] += base::m[i * M + j] * rhs.vec[j];
-
-    return res;
-}
-
-template<typename T, std::size_t N, std::size_t M>
-template<std::size_t P>
-constexpr Matrix<T, N, P> Matrix<T, N, M>::operator*( const Matrix<T, M, P>& rhs ) const noexcept
-{
-    Matrix<T, N, P> res {};
-
-    for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            for ( std::size_t k = 0; k < P; ++k )
-                res.m[i * P + j] += base::m[i * M + k] * rhs.m[k * P + j];
-
-    return res;
 }
 
 template<typename T, std::size_t N, std::size_t M>
@@ -744,233 +753,126 @@ constexpr Matrix<T, N, M>& Matrix<T, N, M>::operator*=( const Matrix<T, M, M>& r
     return *this;
 }
 
+/// <summary>
+/// Transpose a matrix.
+/// </summary>
+/// <typeparam name="T">The type of the matrix elements.</typeparam>
+/// <typeparam name="N">The number of rows of the matrix.</typeparam>
+/// <typeparam name="M">The number of columns of the matrix.</typeparam>
+/// <param name="m">The matrix to transpose.</param>
+/// <returns>The \f(m \times n\f) transposed matrix.</returns>
 template<typename T, std::size_t N, std::size_t M>
-constexpr bool Matrix<T, N, M>::operator==( const Matrix<T, N, M>& rhs ) const noexcept
+constexpr Matrix<T, M, N> transpose( const Matrix<T, N, M>& m ) noexcept
 {
-    bool res = base::m[0] == rhs.m[0];
-    for ( std::size_t i = 1; i < N * M && res; ++i )
-        res = base::m[i] == rhs.m[i];
+    Matrix<T, M, N> res;
+
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < M; ++j )
+            res.row[j][i] = m.row[i][j];
 
     return res;
 }
 
 /// <summary>
-/// Primary class template for transposing a matrix (in-place).
-/// </summary>
-/// <typeparam name="T">The type of the matrix elements.</typeparam>
-/// <typeparam name="N">The number of rows of the matrix.</typeparam>
-/// <typeparam name="M">The number of columns of the matrix.</typeparam>
-template<typename T, std::size_t N, std::size_t M>
-struct Matrix_Transpose
-{
-    static constexpr Matrix<T, M, N> transpose( const Matrix<T, N, M>& m ) noexcept
-    {
-        Matrix<T, M, N> res;
-
-        for ( std::size_t i = 0; i < N; ++i )
-            for ( std::size_t j = 0; j < M; ++j )
-                res.m[j * N + i] = m.m[i * M + j];
-
-        return res;
-    }
-};
-
-/// <summary>
-/// Partial specialization for square matrices.
-/// </summary>
-/// <typeparam name="T">The type of the matrix elements.</typeparam>
-/// <typeparam name="N">The number of rows and columns of the matrix.</typeparam>
-template<typename T, std::size_t N>
-struct Matrix_Transpose<T, N, N>
-{
-    static constexpr Matrix<T, N, N> transpose( Matrix<T, N, N> m ) noexcept
-    {
-        for ( std::size_t i = 0; i < N; ++i )
-            for ( std::size_t j = i + 1; j < N; ++j )
-                std::swap( m.m[i * N + j], m.m[j * N + i] );
-
-        return m;
-    }
-};
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Matrix<T, M, N> transpose( const Matrix<T, N, M>& m ) noexcept
-{
-    return Matrix_Transpose<T, N, M>::transpose( m );
-}
-
-/// <summary>
-/// Primary class template for computing the determinant of a matrix.
+/// Compute the matrix determinant.
 /// </summary>
 /// <remarks>
 /// Matrix determinant is only valid for square matrices.
 /// </remarks>
 /// <typeparam name="T">The type of the matrix elements.</typeparam>
-/// <typeparam name="N">The number of rows of the matrix.</typeparam>
-/// <typeparam name="M">The number of columns of the matrix.</typeparam>
-template<typename T, std::size_t N, std::size_t M>
-struct Matrix_Determinant;
-
-/// <summary>
-/// Partial specialization for a 1x1 matrix.
-/// </summary>
-/// <typeparam name="T">The type of the matrix elements.</typeparam>
-template<typename T>
-struct Matrix_Determinant<T, 1, 1>
-{
-    /// <summary>
-    /// The determinant of a 1x1 matrix is just the single value of the matrix.
-    /// </summary>
-    /// <param name="m">The 1x1 matrix to compute the determinant.</param>
-    /// <returns>The determinate of the matrix.</returns>
-    static constexpr T determinant( const Matrix<T, 1, 1>& m ) noexcept
-    {
-        return m.m[0];
-    }
-};
-
-/// <summary>
-/// Partial specialization for an \f(n\times n\f) (square) matrix.
-/// </summary>
-/// <typeparam name="T">The type of the matrix elements.</typeparam>
-/// <typeparam name="N">The size of the rows and columns of the matrix.</typeparam>
+/// <typeparam name="N">The number of rows and columns of the matrix.</typeparam>
+/// <param name="m">The matrix to compute the determinant for.</param>
+/// <returns>The determinant of the matrix.</returns>
 template<typename T, std::size_t N>
-struct Matrix_Determinant<T, N, N>
+constexpr T determinant( const Matrix<T, N, N>& m ) noexcept
 {
-    /// <summary>
-    /// Compute the cofactor at index \f((i, j)\f).
-    /// \f[
-    /// c_{ij} = (-1)^{i+j}
-    /// \f]
-    /// </summary>
-    /// <param name="i">The \f(i^{th}\f) row.</param>
-    /// <param name="j">The \f(j^{th}\f) column.</param>
-    /// <returns></returns>
-    static constexpr T c( std::size_t i, std::size_t j ) noexcept
+    if constexpr ( N == 1 )
     {
-        // static constexpr T cofactor[] = { T( 1 ), T( -1 ) };
-        return ( i + j ) % 2 == 0 ? T( 1 ) : T( -1 );  // cofactor[( i + j ) % 2];
+        return m.row[0][0];
     }
-
-    static constexpr T determinant( const Matrix<T, N, N>& m ) noexcept
+    else if constexpr ( N == 2 )
     {
+        return m.row[0][0] * m.row[1][1] - m.row[0][1] * m.row[1][0];
+    }
+    else
+    {
+        // Cofactor expansion along the first row.
         T det = T( 0 );
+
         for ( std::size_t j = 0; j < N; ++j )
-            det += m.m[j] * c( 0, j ) * Matrix_Determinant<T, N - 1, N - 1>::determinant( { m, 0, j } );
+        {
+            const T c = j % 2 == 0 ? T( 1 ) : T( -1 );
+            det += m.row[0][j] * c * determinant( Matrix<T, N - 1, N - 1> { m, 0, j } );
+        }
 
         return det;
     }
-};
-
-/// <summary>
-/// Compute the matrix determinate.
-/// </summary>
-/// <remarks>
-/// Matrix determinate is only valid for square matrices.
-/// </remarks>
-/// <typeparam name="T">The matrix type.</typeparam>
-/// <param name="m">The matrix to compute the determinant for.</param>
-/// <returns>The determinant of the matrix.</returns>
-template<typename T, std::size_t N, std::size_t M>
-constexpr T determinant( const Matrix<T, N, M>& m ) noexcept
-{
-    return Matrix_Determinant<T, N, M>::determinant( m );
 }
 
 /// <summary>
-/// Primary template for a helper struct to compute the inverse of a matrix.
+/// Compute the adjugate of a matrix. The adjugate matrix is the transpose of the cofactor matrix.
+/// </summary>
+/// <remarks>
+/// The adjugate matrix is only valid for square matrices.
+/// </remarks>
+/// <typeparam name="T">The type of the matrix elements.</typeparam>
+/// <typeparam name="N">The number of rows and columns of the matrix.</typeparam>
+/// <param name="m">The matrix to compute the adjugate.</param>
+/// <returns>The adjugate matrix.</returns>
+template<typename T, std::size_t N>
+constexpr Matrix<T, N, N> adjugate( const Matrix<T, N, N>& m ) noexcept
+    requires( N > 1 )
+{
+    Matrix<T, N, N> res;
+
+    for ( std::size_t i = 0; i < N; ++i )
+        for ( std::size_t j = 0; j < N; ++j )
+        {
+            const T c        = ( i + j ) % 2 == 0 ? T( 1 ) : T( -1 );
+            res.row[j][i] = c * determinant( Matrix<T, N - 1, N - 1> { m, i, j } );
+        }
+
+    return res;
+}
+
+/// <summary>
+/// Compute the inverse of a matrix.
 /// </summary>
 /// <remarks>
 /// Matrix inverse is only valid for square matrices.
+/// If the matrix is singular (the determinant is 0), the original matrix is returned.
 /// </remarks>
 /// <typeparam name="T">The type of the matrix elements.</typeparam>
-/// <typeparam name="N">The number of rows of the matrix.</typeparam>
-/// <typeparam name="M">The number of columns of the matrix.</typeparam>
-template<typename T, std::size_t N, std::size_t M>
-struct Matrix_Inverse;
-
-/// <summary>
-/// Partial specialization of a 1x1 matrix.
-/// </summary>
-/// <typeparam name="T">The type of the matrix elements.</typeparam>
-template<typename T>
-struct Matrix_Inverse<T, 1, 1>
-{
-    /// <summary>
-    /// The inverse of a 1x1 matrix is the reciprocal of the single entry of the matrix.
-    /// </summary>
-    /// <param name="m">The 1x1 matrix.</param>
-    /// <returns>The determinant of the 1x1 matrix.</returns>
-    static constexpr Matrix<T, 1, 1> inverse( const Matrix<T, 1, 1>& m ) noexcept
-    {
-        return T( 1 ) / m.m[0];
-    }
-};
-
-/// <summary>
-/// Partial specialization for square matrices.
-/// </summary>
-/// <typeparam name="T">The type of the matrix elements.</typeparam>
 /// <typeparam name="N">The number of rows and columns of the matrix.</typeparam>
+/// <param name="m">The matrix to invert.</param>
+/// <returns>The inverse of the matrix.</returns>
 template<typename T, std::size_t N>
-struct Matrix_Inverse<T, N, N>
+constexpr Matrix<T, N, N> inverse( const Matrix<T, N, N>& m ) noexcept
 {
-    /// <summary>
-    /// Compute the cofactor at index \f((i, j)\f).
-    /// \f[
-    /// c_{ij} = (-1)^{i+j}
-    /// \f]
-    /// </summary>
-    /// <param name="i">The \f(i^{th}\f) row.</param>
-    /// <param name="j">The \f(j^{th}\f) column.</param>
-    /// <returns>The \f((i, j)\f) cofactor.</returns>
-    static constexpr T c( std::size_t i, std::size_t j ) noexcept
+    if constexpr ( N == 1 )
     {
-        // static constexpr T cofactor[] = { T( 1 ), T( -1 ) };
-        return ( i + j ) % 2 == 0 ? T( 1 ) : T( -1 );  // cofactor[( i + j ) % 2];
+        // The inverse of a 1x1 matrix is the reciprocal of the single entry of the matrix.
+        return Matrix<T, 1, 1>( T( 1 ) / m.row[0][0] );
     }
-
-    /// <summary>
-    /// Compute the adjugate of the matrix. The adjugate matrix is the transpose of the cofactor matrix.
-    /// </summary>
-    /// <param name="m">The matrix to compute the adjugate.</param>
-    /// <returns>The adjugate matrix.</returns>
-    static constexpr Matrix<T, N, N> adjugate( const Matrix<T, N, N>& m ) noexcept
-    {
-        Matrix<T, N, N> res;
-
-        for ( std::size_t i = 0; i < N; ++i )
-            for ( std::size_t j = 0; j < N; ++j )
-                res.m[j * N + i] = c( i, j ) * Matrix_Determinant<T, N - 1, N - 1>::determinant( { m, i, j } );
-
-        return res;
-    }
-
-    static constexpr Matrix<T, N, N> inverse( const Matrix<T, N, N>& m ) noexcept
+    else
     {
         // First compute the adjugate of the matrix.
-        Matrix<T, N, N> adj = adjugate( m );
+        const Matrix<T, N, N> adj = adjugate( m );
 
         // Next, compute the determinant based on the adjugate matrix.
         T det = T( 0 );
 
-        for ( int j = 0; j < N; ++j )
-            det += m.m[j] * adj.m[j * N];
+        for ( std::size_t j = 0; j < N; ++j )
+            det += m.row[0][j] * adj.row[j][0];
 
         if ( det != T( 0 ) )
             return adj / det;
 
-        assert( ( "Matrix is singular.", false ) );  // NOLINT(clang-diagnostic-string-conversion, clang-diagnostic-unused-value)
+        assert( false && "Matrix is singular." );
 
         // All code paths must return a value.
         return m;
     }
-};
-
-template<typename T, std::size_t N, std::size_t M>
-constexpr Matrix<T, N, M> inverse( const Matrix<T, N, M>& m ) noexcept
-{
-    return Matrix_Inverse<T, N, M>::inverse( m );
 }
 
 /// <summary>
@@ -1103,7 +1005,7 @@ constexpr Matrix<T, 4, 4> rotateZ( T angle ) noexcept
 template<typename T>
 constexpr Matrix<T, 4, 4> rotateAxisAngle( const Vector<T, 3>& axis, T angle ) noexcept
 {
-    assert( ( "Axis must be normalized", isNormalized( axis ) ) );
+    assert( isNormalized( axis ) && "Axis must be normalized" );
 
     const T c  = std::cos( angle );
     const T s  = std::sin( angle );
@@ -1259,7 +1161,7 @@ constexpr Matrix<T, 4, 4> frustumRH11( T l, T r, T b, T t, T n, T f ) noexcept
 
 /// <summary>
 /// Create a frustum projection matrix using the default configuration based on the value
-/// of `LS_DEPTH_RANGE` and `LS_HANDEDNESS`
+/// of `FM_DEPTH_RANGE` and `FM_HANDEDNESS`
 /// </summary>
 /// <seealso cref="frustumLH01"/>
 /// <seealso cref="frustumLH11"/>
@@ -1276,13 +1178,13 @@ constexpr Matrix<T, 4, 4> frustumRH11( T l, T r, T b, T t, T n, T f ) noexcept
 template<typename T>
 constexpr Matrix<T, 4, 4> frustum( T l, T r, T b, T t, T n, T f ) noexcept
 {
-#if LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#if FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return frustumLH01( l, r, b, t, n, f );
-#elif LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return frustumLH11( l, r, b, t, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return frustumRH01( l, r, b, t, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return frustumRH11( l, r, b, t, n, f );
 #endif
 }
@@ -1417,7 +1319,7 @@ constexpr Matrix<T, 4, 4> orthographicRH11( T l, T r, T b, T t, T n, T f ) noexc
 
 /// <summary>
 /// Create an orthographic projection matrix using the default configuration based on the value
-/// of `LS_DEPTH_RANGE` and `LS_HANDEDNESS`
+/// of `FM_DEPTH_RANGE` and `FM_HANDEDNESS`
 /// </summary>
 /// <seealso cref="orthographicLH01"/>
 /// <seealso cref="orthographicLH11"/>
@@ -1434,13 +1336,13 @@ constexpr Matrix<T, 4, 4> orthographicRH11( T l, T r, T b, T t, T n, T f ) noexc
 template<typename T>
 constexpr Matrix<T, 4, 4> orthographic( T l, T r, T b, T t, T n, T f ) noexcept
 {
-#if LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#if FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return orthographicLH01( l, r, b, t, n, f );
-#elif LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return orthographicLH11( l, r, b, t, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return orthographicRH01( l, r, b, t, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return orthographicRH11( l, r, b, t, n, f );
 #endif
 }
@@ -1575,7 +1477,7 @@ constexpr Matrix<T, 4, 4> perspectiveFoVRH11( T fovy, T aspectRatio, T n, T f ) 
 
 /// <summary>
 /// Create a perspective projection matrix using the default configuration based on the values
-/// of `LS_HANDEDNESS` and `LS_DEPTH_RANGE`.
+/// of `FM_HANDEDNESS` and `FM_DEPTH_RANGE`.
 /// </summary>
 /// <seealso cref="perspectiveFoVLH01"/>
 /// <seealso cref="perspectiveFoVLH11"/>
@@ -1590,13 +1492,13 @@ constexpr Matrix<T, 4, 4> perspectiveFoVRH11( T fovy, T aspectRatio, T n, T f ) 
 template<typename T>
 constexpr Matrix<T, 4, 4> perspectiveFoV( T fovy, T aspectRatio, T n, T f ) noexcept
 {
-#if LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#if FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return perspectiveFoVLH01( fovy, aspectRatio, n, f );
-#elif LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return perspectiveFoVLH11( fovy, aspectRatio, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return perspectiveFoVRH01( fovy, aspectRatio, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return perspectiveFoVRH11( fovy, aspectRatio, n, f );
 #endif
 }
@@ -1711,7 +1613,7 @@ constexpr Matrix<T, 4, 4> perspectiveRH11( T w, T h, T n, T f ) noexcept
 
 /// <summary>
 /// Create a perspective projection matrix using the default configuration based on the values
-/// of `LS_HANDEDNESS` and `LS_DEPTH_RANGE`.
+/// of `FM_HANDEDNESS` and `FM_DEPTH_RANGE`.
 /// </summary>
 /// <seealso cref="perspectiveLH01"/>
 /// <seealso cref="perspectiveLH11"/>
@@ -1726,13 +1628,13 @@ constexpr Matrix<T, 4, 4> perspectiveRH11( T w, T h, T n, T f ) noexcept
 template<typename T>
 constexpr Matrix<T, 4, 4> perspective( T w, T h, T n, T f ) noexcept
 {
-#if LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#if FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return perspectiveLH01( w, h, n, f );
-#elif LS_HANDEDNESS == LS_LEFT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_LEFT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return perspectiveLH11( w, h, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_ZERO_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_ZERO_TO_ONE
     return perspectiveRH01( w, h, n, f );
-#elif LS_HANDEDNESS == LS_RIGHT_HANDED && LS_DEPTH_RANGE == LS_NEGATIVE_ONE_TO_ONE
+#elif FM_HANDEDNESS == FM_RIGHT_HANDED && FM_DEPTH_RANGE == FM_NEGATIVE_ONE_TO_ONE
     return perspectiveRH11( w, h, n, f );
 #endif
 }
@@ -1784,7 +1686,7 @@ constexpr Matrix<T, 4, 4> lookAtRH( const Vector<T, 3>& eye, const Vector<T, 3>&
 }
 
 /// <summary>
-/// Build a view matrix depending on the value of `LS_HANDEDNESS`.
+/// Build a view matrix depending on the value of `FM_HANDEDNESS`.
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
 /// <param name="eye">The eye position.</param>
@@ -1794,7 +1696,7 @@ constexpr Matrix<T, 4, 4> lookAtRH( const Vector<T, 3>& eye, const Vector<T, 3>&
 template<typename T>
 constexpr Matrix<T, 4, 4> lookAt( const Vector<T, 3>& eye, const Vector<T, 3>& target, const Vector<T, 3>& up = Vector<T, 3>::UNIT_Y )
 {
-#if LS_HANDEDNESS == LS_LEFT_HANDED
+#if FM_HANDEDNESS == FM_LEFT_HANDED
     return lookAtLH( eye, target, up );
 #else
     return lookAtRH( eye, target, up );
@@ -1848,7 +1750,7 @@ constexpr Matrix<T, 4, 4> lookToRH( const Vector<T, 3>& eye, const Vector<T, 3>&
 }
 
 /// <summary>
-/// Build a look-to view matrix based on the value of `LS_HANDEDNESS`.
+/// Build a look-to view matrix based on the value of `FM_HANDEDNESS`.
 /// </summary>
 /// <typeparam name="T">The matrix type.</typeparam>
 /// <param name="eye">The eye position.</param>
@@ -1858,35 +1760,11 @@ constexpr Matrix<T, 4, 4> lookToRH( const Vector<T, 3>& eye, const Vector<T, 3>&
 template<typename T>
 constexpr Matrix<T, 4, 4> lookTo( const Vector<T, 3>& eye, const Vector<T, 3>& direction, const Vector<T, 3>& up = Vector<T, 3>::UNIT_Y )
 {
-#if LS_HANDEDNESS == LS_LEFT_HANDED
+#if FM_HANDEDNESS == FM_LEFT_HANDED
     return lookToLH( eye, direction, up );
 #else
     return lookToRH( eye, direction, up );
 #endif
-}
-
-template<typename T, ConvertibleTo<T> U, std::size_t N, std::size_t M>
-constexpr Matrix<T, N, M> operator*( U lhs, const Matrix<T, N, M>& rhs ) noexcept
-{
-    Matrix<T, N, M> res;
-
-    for ( std::size_t i = 0; i < N; ++i )
-        for ( std::size_t j = 0; j < M; ++j )
-            res.m[i * M + j] = static_cast<T>( lhs ) * rhs.m[i * M + j];
-
-    return res;
-}
-
-template<typename T, ConvertibleTo<T> U, std::size_t N, std::size_t M>
-Vector<T, M> operator*( const Vector<T, N>& lhs, const Matrix<U, N, M>& rhs ) noexcept
-{
-    Vector<T, M> res;
-
-    for ( std::size_t j = 0; j < M; ++j )
-        for ( std::size_t i = 0; i < N; ++i )
-            res.vec[j] += lhs.vec[i] * static_cast<T>( rhs.m[i * M + j] );
-
-    return res;
 }
 
 }  // namespace FastMath

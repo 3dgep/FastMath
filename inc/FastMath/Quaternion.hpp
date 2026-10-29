@@ -146,6 +146,11 @@ struct Quaternion : QuaternionBase<T>
     /// <summary>
     /// Unary minus operator.
     /// </summary>
+    /// <remarks>
+    /// `-q` represents the <b>same</b> rotation as `q` (unit quaternions cover every rotation twice).
+    /// Use <see cref="FastMath::conjugate"/> or <see cref="FastMath::inverse"/> for the opposite rotation,
+    /// and <see cref="FastMath::sameRotation"/> to check if two quaternions represent the same rotation.
+    /// </remarks>
     /// <returns>A copy of this quaternion with all of the components negated.</returns>
     constexpr Quaternion<T> operator-() const noexcept;
 
@@ -162,110 +167,179 @@ struct Quaternion : QuaternionBase<T>
     /// </summary>
     /// <param name="rhs">The quaternion to add to this one.</param>
     /// <returns>A reference to this quaternion, after addition.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion<T>& operator+=( const Quaternion<U>& rhs ) noexcept;
+    constexpr Quaternion<T>& operator+=( const Quaternion<T>& rhs ) noexcept;
 
     /// <summary>
     /// Subtraction and assignment operator.
     /// </summary>
     /// <param name="rhs">Th quaternion to subtract from this one.</param>
     /// <returns>A reference to this quaternion, after subtraction.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion<T>& operator-=( const Quaternion<U>& rhs ) noexcept;
+    constexpr Quaternion<T>& operator-=( const Quaternion<T>& rhs ) noexcept;
 
     /// <summary>
     /// Quaternion multiplication.
     /// </summary>
     /// <param name="rhs">The quaternion to multiply with this one.</param>
     /// <returns>A reference to this quaternion, after multiplication.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion<T>& operator*=( const Quaternion<U>& rhs ) noexcept;
+    constexpr Quaternion<T>& operator*=( const Quaternion<T>& rhs ) noexcept;
 
     /// <summary>
     /// Multiply this quaternion by a scalar.
     /// </summary>
     /// <param name="s">The scalar to multiply this quaternion.</param>
     /// <returns>A reference to this quaternion, after scalar multiplication.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion& operator*=( U s );
+    constexpr Quaternion<T>& operator*=( T s ) noexcept;
 
     /// <summary>
     /// Divide this quaternion by a scalar.
     /// </summary>
     /// <param name="s">The scalar to divide this quaternion.</param>
     /// <returns>A reference to this quaternion, after scalar division.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion& operator/=( U s );
+    constexpr Quaternion<T>& operator/=( T s ) noexcept;
+
+    // The binary operators are hidden friends: they are only found by argument-dependent lookup
+    // when one of the operands is a Quaternion<T>. This keeps overload resolution (and compile errors)
+    // small, and allows the scalar to be on either side of the operator.
 
     /// <summary>
     /// Quaternion addition.
     /// </summary>
-    /// <param name="rhs">The quaternion to add to this one.</param>
-    /// <returns>The sum of this quaternion and `rhs`.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion operator+( const Quaternion<U>& rhs ) const noexcept;
+    /// <param name="lhs">The first quaternion.</param>
+    /// <param name="rhs">The second quaternion.</param>
+    /// <returns>The sum of `lhs` and `rhs`.</returns>
+    friend constexpr Quaternion<T> operator+( Quaternion<T> lhs, const Quaternion<T>& rhs ) noexcept
+    {
+        return lhs += rhs;
+    }
 
     /// <summary>
     /// Quaternion subtraction.
     /// </summary>
-    /// <param name="rhs">The quaternion to subtract with this one.</param>
-    /// <returns>The result of subtracting `rhs` from this quaternion.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion operator-( const Quaternion<U>& rhs ) const noexcept;
+    /// <param name="lhs">The quaternion to subtract from.</param>
+    /// <param name="rhs">The quaternion to subtract.</param>
+    /// <returns>The result of subtracting `rhs` from `lhs`.</returns>
+    friend constexpr Quaternion<T> operator-( Quaternion<T> lhs, const Quaternion<T>& rhs ) noexcept
+    {
+        return lhs -= rhs;
+    }
 
     /// <summary>
     /// Quaternion multiplication.
     /// </summary>
-    /// <param name="rhs">The quaternion to multiply with this one.</param>
-    /// <returns>The result of multiplying this quaternion with `rhs`.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion operator*( const Quaternion<U>& rhs ) const noexcept;
+    /// <param name="lhs">The first quaternion.</param>
+    /// <param name="rhs">The second quaternion.</param>
+    /// <returns>The result of multiplying `lhs` with `rhs`.</returns>
+    friend constexpr Quaternion<T> operator*( Quaternion<T> lhs, const Quaternion<T>& rhs ) noexcept
+    {
+        return lhs *= rhs;
+    }
 
     /// <summary>
     /// Transform a 3-component vector by a quaternion.
     /// </summary>
+    /// <param name="q">The quaternion.</param>
     /// <param name="v">The vector to rotate.</param>
     /// <returns>The transformed vector.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Vector<U, 3> operator*( const Vector<U, 3>& v ) const noexcept;
+    friend constexpr Vector<T, 3> operator*( const Quaternion<T>& q, const Vector<T, 3>& v ) noexcept
+    {
+        const Vector<T, 3> qv { q.quat[1], q.quat[2], q.quat[3] };
+        const Vector<T, 3> uv  = cross( qv, v );
+        const Vector<T, 3> uuv = cross( qv, uv );
+
+        return v + ( uv * q.quat[0] + uuv ) * T( 2 );
+    }
 
     /// <summary>
     /// Transform a 4-component vector by a quaternion.
     /// </summary>
+    /// <remarks>
+    /// The w-component of the vector is not modified.
+    /// </remarks>
+    /// <param name="q">The quaternion.</param>
     /// <param name="v">The vector to rotate.</param>
     /// <returns>The transformed vector.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Vector<U, 4> operator*( const Vector<U, 4>& v ) const noexcept;
+    friend constexpr Vector<T, 4> operator*( const Quaternion<T>& q, const Vector<T, 4>& v ) noexcept
+    {
+        return { q * Vector<T, 3> { v }, v.w };
+    }
 
     /// <summary>
-    /// Multiply by a scalar.
+    /// Transform a 3-component vector by the inverse of a quaternion.
     /// </summary>
-    /// <param name="s">The scalar to multiply this quaternion with.</param>
-    /// <returns>The result of multiplying this quaternion by a scalar.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion operator*( U s ) const noexcept;
+    /// <param name="v">The vector to transform.</param>
+    /// <param name="q">The quaternion.</param>
+    /// <returns>The result of transforming the vector by the inverse of the quaternion.</returns>
+    friend constexpr Vector<T, 3> operator*( const Vector<T, 3>& v, const Quaternion<T>& q ) noexcept
+    {
+        return inverse( q ) * v;
+    }
 
     /// <summary>
-    /// Divide by a scalar.
+    /// Transform a 4-component vector by the inverse of a quaternion.
     /// </summary>
-    /// <param name="s">The scalar to divide this quaternion with.</param>
-    /// <returns>The result of dividing this quaternion by a scalar.</returns>
-    template<ConvertibleTo<T> U>
-    constexpr Quaternion operator/( U s ) const;
+    /// <remarks>
+    /// The w-component of the vector is not modified.
+    /// </remarks>
+    /// <param name="v">The vector to transform.</param>
+    /// <param name="q">The quaternion.</param>
+    /// <returns>The result of transforming the vector by the inverse of the quaternion.</returns>
+    friend constexpr Vector<T, 4> operator*( const Vector<T, 4>& v, const Quaternion<T>& q ) noexcept
+    {
+        return inverse( q ) * v;
+    }
+
+    /// <summary>
+    /// Multiply a quaternion by a scalar.
+    /// </summary>
+    /// <param name="lhs">The quaternion.</param>
+    /// <param name="s">The scalar to multiply the quaternion with.</param>
+    /// <returns>The result of multiplying the quaternion by a scalar.</returns>
+    friend constexpr Quaternion<T> operator*( Quaternion<T> lhs, T s ) noexcept
+    {
+        return lhs *= s;
+    }
+
+    /// <summary>
+    /// Multiply a quaternion by a scalar.
+    /// </summary>
+    /// <param name="s">The scalar to multiply the quaternion with.</param>
+    /// <param name="rhs">The quaternion.</param>
+    /// <returns>The result of multiplying the quaternion by a scalar.</returns>
+    friend constexpr Quaternion<T> operator*( T s, Quaternion<T> rhs ) noexcept
+    {
+        return rhs *= s;
+    }
+
+    /// <summary>
+    /// Divide a quaternion by a scalar.
+    /// </summary>
+    /// <param name="lhs">The quaternion.</param>
+    /// <param name="s">The scalar to divide the quaternion with.</param>
+    /// <returns>The result of dividing the quaternion by a scalar.</returns>
+    friend constexpr Quaternion<T> operator/( Quaternion<T> lhs, T s ) noexcept
+    {
+        return lhs /= s;
+    }
 
     /// <summary>
     /// Equality comparison.
     /// </summary>
-    /// <param name="rhs">The quaternion to compare to this one.</param>
-    /// <returns></returns>
-    constexpr bool operator==( const Quaternion& rhs ) const noexcept;
+    /// <remarks>
+    /// This performs exact comparison of floating-point values.
+    /// Use <see cref="FastMath::equal"/> to check if two quaternions are nearly equal.
+    /// </remarks>
+    /// <param name="lhs">The first quaternion to compare.</param>
+    /// <param name="rhs">The second quaternion to compare.</param>
+    /// <returns>`true` if all components are equal, `false` otherwise.</returns>
+    friend constexpr bool operator==( const Quaternion<T>& lhs, const Quaternion<T>& rhs ) noexcept
+    {
+        // Compare the array (the active member of the union) so this can be used in constant expressions.
+        for ( std::size_t i = 0; i < 4; ++i )
+            if ( lhs.quat[i] != rhs.quat[i] )
+                return false;
 
-    /// <summary>
-    /// Inequality comparison.
-    /// </summary>
-    /// <param name="rhs">The quaternion to compare to this one.</param>
-    /// <returns></returns>
-    constexpr bool operator!=( const Quaternion& rhs ) const noexcept;
+        return true;
+    }
 };
 
 /// <summary>
@@ -287,9 +361,6 @@ using quat = Quaternion<float>;
 /// Alias of a double-precision floating-point quaternion.
 /// </summary>
 using dquat = Quaternion<double>;
-
-template<typename T>
-inline const Quaternion<T> Quaternion<T>::IDENTITY { T( 1 ), T( 0 ), T( 0 ), T( 0 ) };
 
 template<typename T>
 constexpr std::size_t Quaternion<T>::size() const noexcept
@@ -316,10 +387,11 @@ template<typename T>
 template<ConvertibleTo<T> W, ConvertibleTo<T> X, ConvertibleTo<T> Y, ConvertibleTo<T> Z>
 constexpr Quaternion<T>::Quaternion( W w, X x, Y y, Z z ) noexcept
 {
-    base::w = static_cast<T>( w );
-    base::x = static_cast<T>( x );
-    base::y = static_cast<T>( y );
-    base::z = static_cast<T>( z );
+    // Write to the active member of the union, so this constructor can be used in constant expressions.
+    base::quat[0] = static_cast<T>( w );
+    base::quat[1] = static_cast<T>( x );
+    base::quat[2] = static_cast<T>( y );
+    base::quat[3] = static_cast<T>( z );
 }
 
 template<typename T>
@@ -368,18 +440,18 @@ template<typename T>
 template<ConvertibleTo<T> W, ConvertibleTo<T> U>
 constexpr Quaternion<T>::Quaternion( W w, const Vector<U, 3>& v ) noexcept
 {
-    base::w   = static_cast<T>( w );
-    base::vec = v;
+    base::quat[0] = static_cast<T>( w );
+    base::quat[1] = static_cast<T>( v.x );
+    base::quat[2] = static_cast<T>( v.y );
+    base::quat[3] = static_cast<T>( v.z );
 }
 
 template<typename T>
 template<ConvertibleTo<T> U>
 constexpr Quaternion<T>::Quaternion( const Quaternion<U>& rhs ) noexcept
 {
-    base::w = static_cast<T>( rhs.w );
-    base::x = static_cast<T>( rhs.x );
-    base::y = static_cast<T>( rhs.y );
-    base::z = static_cast<T>( rhs.z );
+    for ( std::size_t i = 0; i < 4; ++i )
+        base::quat[i] = static_cast<T>( rhs.quat[i] );
 }
 
 /// <summary>
@@ -442,7 +514,7 @@ constexpr Quaternion<T> fromMat3( const Matrix<T, 3>& m ) noexcept
 /// \f[ q = \left[\frac{\sqrt{1+m_{00}+m_{11}+m_{22}}}{2}, \frac{m_{21}-m_{12}}{4q_w}, \frac{m_{02}-m_{20}}{4q_w}, \frac{m_{10}-m_{01}}{4q_w}\right] \f]
 /// </summary>
 /// <remarks>
-/// This is just an alias for the ls::fromMat3 function.
+/// This is just an alias for the FastMath::fromMat3 function.
 /// </remarks>
 /// <seealso href="https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/"/>
 /// <typeparam name="T">The quaternion type.</typeparam>
@@ -478,7 +550,7 @@ constexpr Quaternion<T> fromMat4( const Matrix<T, 4>& m ) noexcept
 /// \f[ q = \left[\frac{\sqrt{1+m_{00}+m_{11}+m_{22}}}{2}, \frac{m_{21}-m_{12}}{4q_w}, \frac{m_{02}-m_{20}}{4q_w}, \frac{m_{10}-m_{01}}{4q_w}\right] \f]
 /// </summary>
 /// <remarks>
-/// This is just an alias for `ls::fromMat4`.
+/// This is just an alias for `FastMath::fromMat4`.
 /// </remarks>
 /// <seealso href="https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/"/>
 /// <typeparam name="T">The quaternion type.</typeparam>
@@ -572,6 +644,10 @@ constexpr Quaternion<T>::operator Matrix<T, 4>() const noexcept
     return toMat4( *this );
 }
 
+// IDENTITY is defined after the constructors so it can be evaluated at compile time.
+template<typename T>
+inline constexpr Quaternion<T> Quaternion<T>::IDENTITY { T( 1 ), T( 0 ), T( 0 ), T( 0 ) };
+
 template<typename T>
 constexpr T& Quaternion<T>::operator[]( std::size_t i ) noexcept
 {
@@ -597,177 +673,69 @@ constexpr Quaternion<T> Quaternion<T>::operator+() const noexcept
 template<typename T>
 constexpr Quaternion<T> Quaternion<T>::operator-() const noexcept
 {
-    return { base::w, -base::x, -base::y, -base::z };
+    return { -base::quat[0], -base::quat[1], -base::quat[2], -base::quat[3] };
 }
 
 template<typename T>
 template<ConvertibleTo<T> U>
 constexpr Quaternion<T>& Quaternion<T>::operator=( const Quaternion<U>& rhs ) noexcept
 {
-    base::w = static_cast<T>( rhs.w );
-    base::x = static_cast<T>( rhs.x );
-    base::y = static_cast<T>( rhs.y );
-    base::z = static_cast<T>( rhs.z );
+    for ( std::size_t i = 0; i < 4; ++i )
+        base::quat[i] = static_cast<T>( rhs.quat[i] );
+
+    return *this;
+}
+
+// The arithmetic operators access the components through `quat[]` (the active member of the union)
+// instead of `w`, `x`, `y`, `z` so that they can be used in constant expressions.
+
+template<typename T>
+constexpr Quaternion<T>& Quaternion<T>::operator+=( const Quaternion<T>& rhs ) noexcept
+{
+    for ( std::size_t i = 0; i < 4; ++i )
+        base::quat[i] += rhs.quat[i];
 
     return *this;
 }
 
 template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T>& Quaternion<T>::operator+=( const Quaternion<U>& rhs ) noexcept
+constexpr Quaternion<T>& Quaternion<T>::operator-=( const Quaternion<T>& rhs ) noexcept
 {
-    base::w += static_cast<T>( rhs.w );
-    base::x += static_cast<T>( rhs.x );
-    base::y += static_cast<T>( rhs.y );
-    base::z += static_cast<T>( rhs.z );
+    for ( std::size_t i = 0; i < 4; ++i )
+        base::quat[i] -= rhs.quat[i];
 
     return *this;
 }
 
 template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T>& Quaternion<T>::operator-=( const Quaternion<U>& rhs ) noexcept
+constexpr Quaternion<T>& Quaternion<T>::operator*=( const Quaternion<T>& rhs ) noexcept
 {
-    base::w -= static_cast<T>( rhs.w );
-    base::x -= static_cast<T>( rhs.x );
-    base::y -= static_cast<T>( rhs.y );
-    base::z -= static_cast<T>( rhs.z );
+    const T w1 = base::quat[0], x1 = base::quat[1], y1 = base::quat[2], z1 = base::quat[3];
+    const T w2 = rhs.quat[0], x2 = rhs.quat[1], y2 = rhs.quat[2], z2 = rhs.quat[3];
+
+    base::quat[0] = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
+    base::quat[1] = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;
+    base::quat[2] = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2;
+    base::quat[3] = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2;
 
     return *this;
 }
 
 template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T>& Quaternion<T>::operator*=( const Quaternion<U>& rhs ) noexcept
+constexpr Quaternion<T>& Quaternion<T>::operator*=( T s ) noexcept
 {
-    const Quaternion<T> q1 { *this };
-    const Quaternion<T> q2 { rhs };
-
-    base::w = q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z;
-    base::x = q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y;
-    base::y = q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x;
-    base::z = q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w;
+    for ( std::size_t i = 0; i < 4; ++i )
+        base::quat[i] *= s;
 
     return *this;
 }
 
 template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T>& Quaternion<T>::operator*=( U s )
+constexpr Quaternion<T>& Quaternion<T>::operator/=( T s ) noexcept
 {
-    base::w *= static_cast<T>( s );
-    base::x *= static_cast<T>( s );
-    base::y *= static_cast<T>( s );
-    base::z *= static_cast<T>( s );
+    assert( s != T( 0 ) );
 
-    return *this;
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T>& Quaternion<T>::operator/=( U s )
-{
-    assert( s != U( 0 ) );
-
-    const T invS = T( 1 ) / static_cast<T>( s );
-
-    base::w *= invS;
-    base::x *= invS;
-    base::y *= invS;
-    base::z *= invS;
-
-    return *this;
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T> Quaternion<T>::operator+( const Quaternion<U>& rhs ) const noexcept
-{
-    return {
-        base::w + static_cast<T>( rhs.w ),
-        base::x + static_cast<T>( rhs.x ),
-        base::y + static_cast<T>( rhs.y ),
-        base::z + static_cast<T>( rhs.z ),
-    };
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T> Quaternion<T>::operator-( const Quaternion<U>& rhs ) const noexcept
-{
-    return {
-        base::w - static_cast<T>( rhs.w ),
-        base::x - static_cast<T>( rhs.x ),
-        base::y - static_cast<T>( rhs.y ),
-        base::z - static_cast<T>( rhs.z ),
-    };
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T> Quaternion<T>::operator*( const Quaternion<U>& rhs ) const noexcept
-{
-    const Quaternion<T> q2 { rhs };
-
-    return {
-        base::w * q2.w - base::x * q2.x - base::y * q2.y - base::z * q2.z,
-        base::w * q2.x + base::x * q2.w + base::y * q2.z - base::z * q2.y,
-        base::w * q2.y - base::x * q2.z + base::y * q2.w + base::z * q2.x,
-        base::w * q2.z + base::x * q2.y - base::y * q2.x + base::z * q2.w,
-    };
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Vector<U, 3> Quaternion<T>::operator*( const Vector<U, 3>& v ) const noexcept
-{
-    const Vector<T, 3> qv { base::x, base::y, base::z };
-    const Vector<T, 3> uv  = cross( qv, v );
-    const Vector<T, 3> uuv = cross( qv, uv );
-
-    return v + ( uv * base::w + uuv ) * T( 2 );
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Vector<U, 4> Quaternion<T>::operator*( const Vector<U, 4>& v ) const noexcept
-{
-    return { *this * Vector<U, 3> { v }, v.w };
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T> Quaternion<T>::operator*( U s ) const noexcept
-{
-    return {
-        base::w * static_cast<T>( s ),
-        base::x * static_cast<T>( s ),
-        base::y * static_cast<T>( s ),
-        base::z * static_cast<T>( s ),
-    };
-}
-
-template<typename T>
-template<ConvertibleTo<T> U>
-constexpr Quaternion<T> Quaternion<T>::operator/( U s ) const
-{
-    assert( s != U( 0 ) );
-
-    const T invS = T( 1 ) / static_cast<T>( s );
-
-    return *this * invS;
-}
-
-template<typename T>
-constexpr bool Quaternion<T>::operator==( const Quaternion& rhs ) const noexcept
-{
-    return base::w == rhs.w && base::x == rhs.x && base::y == rhs.y && base::z == rhs.z;
-}
-
-template<typename T>
-constexpr bool Quaternion<T>::operator!=( const Quaternion& rhs ) const noexcept
-{
-    return !( *this == rhs );
+    return *this *= T( 1 ) / s;
 }
 
 /// <summary>
@@ -783,7 +751,7 @@ constexpr bool Quaternion<T>::operator!=( const Quaternion& rhs ) const noexcept
 template<typename T>
 constexpr T dot( const Quaternion<T>& q1, const Quaternion<T>& q2 )
 {
-    return q1.w * q2.w + q1.x * q2.x + q1.y * q2.y + q1.z * q2.z;
+    return q1.quat[0] * q2.quat[0] + q1.quat[1] * q2.quat[1] + q1.quat[2] * q2.quat[2] + q1.quat[3] * q2.quat[3];
 }
 
 /// <summary>
@@ -855,12 +823,7 @@ constexpr bool isNormalized( const Quaternion<T>& q, T epsilon = EPSILON<T> ) no
 template<typename T>
 constexpr Quaternion<T> cross( const Quaternion<T>& q1, const Quaternion<T>& q2 ) noexcept
 {
-    return {
-        q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z,
-        q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
-        q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x,
-        q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w
-    };
+    return q1 * q2;
 }
 
 /// <summary>
@@ -872,7 +835,7 @@ constexpr Quaternion<T> cross( const Quaternion<T>& q1, const Quaternion<T>& q2 
 template<typename T>
 constexpr Quaternion<T> conjugate( const Quaternion<T>& q ) noexcept
 {
-    return { q.w, -q.x, -q.y, -q.z };
+    return { q.quat[0], -q.quat[1], -q.quat[2], -q.quat[3] };
 }
 
 /// <summary>
@@ -957,7 +920,7 @@ constexpr Quaternion<T> axisAngle( const Vector<T, 3>& axis, T angle ) noexcept
 template<typename T>
 constexpr T pitch( const Quaternion<T>& q ) noexcept
 {
-    const T x = q.w * q.w - q.x * q.x - q.y * q.y + q.x * q.z;
+    const T x = q.w * q.w - q.x * q.x - q.y * q.y + q.z * q.z;
     const T y = T( 2 ) * ( q.y * q.z + q.w * q.x );
 
     if ( all( equal( Vector<T, 2> { x, y }, Vector<T, 2> { 0 }, EPSILON<T> ) ) )
@@ -1160,21 +1123,21 @@ constexpr Quaternion<T> slerp( const Quaternion<T>& q0, const Quaternion<T>& q1,
 {
     T c = dot( q0, q1 );  // cosine angle between q0 and q1.
 
+    Quaternion<T> q = q1;
+    // If the cosine angle between q0 and q1 is < 0, then negate q1 so
+    // that the interpolation takes the shortest path from q0 to q1.
+    if ( c < T( 0 ) )
+    {
+        q = -q;
+        c = -c;
+    }
+
     // If cosine angle is close to 1, then the angle between q0 and q1
     // is very near 0. In this case, just perform a linear interpolation
     // to avoid divide by 0 error (when sin(a) ~= 0).
     if ( c > T( 1 ) - EPSILON<T> )
     {
-        return lerp( q0, q1, t );
-    }
-
-    Quaternion<T> q = q1;
-    // If the cosine angle between q0 and q1 is < 0, then negate q1 so
-    // that the interpolation takes the shortest path from q1 to q1.
-    if ( c < T( 0 ) )
-    {
-        q = -q;
-        c = -c;
+        return normalize( lerp( q0, q, t ) );
     }
 
     const T a = std::acos( c );  // Compute the angle.
@@ -1272,45 +1235,24 @@ constexpr Vector<bool, 4> notEqual( const Quaternion<T>& a, const Quaternion<T>&
 }
 
 /// <summary>
-/// Pre-multiply a 3-component vector by a quaternion.
+/// Check if two unit quaternions represent the same rotation.
 /// </summary>
-/// <typeparam name="T">The quaternion value type.</typeparam>
-/// <typeparam name="U">The vector value type.</typeparam>
-/// <param name="v">The vector to transform.</param>
-/// <param name="q">The quaternion.</param>
-/// <returns>The result of transforming the vector by the inverse of the quaternion.</returns>
-template<typename T, ConvertibleTo<T> U>
-constexpr Vector<U, 3> operator*( const Vector<U, 3>& v, const Quaternion<T>& q )
+/// <remarks>
+/// Unlike `==` and <see cref="FastMath::equal"/>, this returns `true` for `q` and `-q`,
+/// since they represent the same rotation. Both quaternions must be normalized.
+/// </remarks>
+/// <typeparam name="T">The quaternion type.</typeparam>
+/// <param name="a">The first quaternion.</param>
+/// <param name="b">The second quaternion.</param>
+/// <param name="epsilon">The tolerance. The default (`1e-6`) allows a difference of about 0.16 degrees.</param>
+/// <returns>`true` if `a` and `b` represent the same rotation, `false` otherwise.</returns>
+template<typename T>
+constexpr bool sameRotation( const Quaternion<T>& a, const Quaternion<T>& b, T epsilon = T( 1e-6 ) ) noexcept
 {
-    return inverse( q ) * v;
-}
+    // |dot(a, b)| is the cosine of half the angle between the two rotations.
+    const T d = dot( a, b );
 
-/// <summary>
-/// Pre-multiply a 4-component vector by a quaternion.
-/// </summary>
-/// <typeparam name="T">The quaternion value type.</typeparam>
-/// <typeparam name="T">The vector value type.</typeparam>
-/// <param name="v">The vector to transform.</param>
-/// <param name="q">The quaternion.</param>
-/// <returns>The result of transforming the vector by the inverse of the quaternion.</returns>
-template<typename T, ConvertibleTo<T> U>
-constexpr Vector<U, 4> operator*( const Vector<U, 4>& v, const Quaternion<T>& q )
-{
-    return inverse( q ) * v;
-}
-
-/// <summary>
-/// Pre multiply a scalar by a quaternion.
-/// </summary>
-/// <typeparam name="T">The quaternion value type.</typeparam>
-/// <typeparam name="U">The scalar value type.</typeparam>
-/// <param name="s">The scalar value.</param>
-/// <param name="q">The quaternion.</param>
-/// <returns>The scaled quaternion.</returns>
-template<typename T, ConvertibleTo<T> U>
-constexpr Quaternion<T> operator*( U s, const Quaternion<T>& q )
-{
-    return q * s;
+    return ( d < T( 0 ) ? -d : d ) >= T( 1 ) - epsilon;
 }
 
 }  // namespace FastMath

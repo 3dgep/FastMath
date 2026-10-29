@@ -1,4 +1,4 @@
-#include <LightSpeed/Math/Vector.hpp>
+#include <FastMath/Vector.hpp>
 #include <benchmark/benchmark.h>
 #include <glm/glm.hpp>
 
@@ -83,16 +83,16 @@ static void Vector_Dot_GLM( benchmark::State& state )
 }
 BENCHMARK( Vector_Dot_GLM );
 
-static void Vector_Dot_LightSpeed( benchmark::State& state )
+static void Vector_Dot_FastMath( benchmark::State& state )
 {
-    const ls::Vector4f a = { 1, 3, 4, 4 };
-    const ls::Vector4f b = { 1, 2, 3, 4 };
+    const FastMath::Vector4f a = { 1, 2, 3, 4 };
+    const FastMath::Vector4f b = { 1, 2, 3, 4 };
 
     float res;
     for ( auto _: state )
     {
-        res = ls::dot( a, b );
+        res = FastMath::dot( a, b );
         benchmark::DoNotOptimize( res );
     }
 }
-BENCHMARK( Vector_Dot_LightSpeed );
+BENCHMARK( Vector_Dot_FastMath );

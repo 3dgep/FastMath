@@ -7,7 +7,7 @@
 /// A concept that checks if a type (`From`) is convertible to 
 /// another type (`To`).
 /// </summary>
-/// <see cref="ls::Math::Matrix" />
+/// <see cref="FastMath::Matrix" />
 template<typename From, typename To>
 concept ConvertibleTo = std::convertible_to<From, To>;
 

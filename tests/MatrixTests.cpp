@@ -22,10 +22,10 @@ TEST( Matrix, Default_Constructor )
 {
     Matrix2f a;
 
-    ASSERT_EQ( a.X.x, 0.0f );
-    ASSERT_EQ( a.X.y, 0.0f );
-    ASSERT_EQ( a.Y.x, 0.0f );
-    ASSERT_EQ( a.Y.y, 0.0f );
+    ASSERT_EQ( a[0].x, 0.0f );
+    ASSERT_EQ( a[0].y, 0.0f );
+    ASSERT_EQ( a[1].x, 0.0f );
+    ASSERT_EQ( a[1].y, 0.0f );
 }
 
 TEST( Matrix, Index_Operator )
@@ -385,10 +385,9 @@ TEST( Matrix, Matrix_Inverse3 )
 
     a = inverse( a );
 
-    for ( int i = 0; i < 9; ++i )
-    {
-        ASSERT_FLOAT_EQ( a.m[i], b.m[i] );
-    }
+    for ( int i = 0; i < 3; ++i )
+        for ( int j = 0; j < 3; ++j )
+            ASSERT_FLOAT_EQ( a[i][j], b[i][j] );
 }
 
 TEST( Matrix, Matrix_Inverse4 )
@@ -400,11 +399,9 @@ TEST( Matrix, Matrix_Inverse4 )
     auto a_inv = inverse( a );
     auto I     = a * a_inv;
 
-    for ( int i = 0; i < 9; ++i )
-    {
-        // Close enough...
-        EXPECT_NEAR( I.m[i], b.m[i], 1e-15 );
-    }
+    for ( int i = 0; i < 3; ++i )
+        for ( int j = 0; j < 3; ++j )
+            EXPECT_NEAR( I[i][j], b[i][j], 1e-15 );  // Close enough...
 }
 
 TEST( Matrix, Translate_Vector3 )
@@ -1116,18 +1113,90 @@ TEST( Matrix, LookAtLH )
 {
     mat4 m = lookAtLH<float>( { 0, 0, 0 }, { 0, 0, 1 }, { 0, 1, 0 } );
 
-    ASSERT_EQ( m.X, vec4::UNIT_X );
-    ASSERT_EQ( m.Y, vec4::UNIT_Y );
-    ASSERT_EQ( m.Z, vec4::UNIT_Z );
-    ASSERT_EQ( m.W, vec4::UNIT_W );
+    ASSERT_EQ( m[0], vec4::UNIT_X );
+    ASSERT_EQ( m[1], vec4::UNIT_Y );
+    ASSERT_EQ( m[2], vec4::UNIT_Z );
+    ASSERT_EQ( m[3], vec4::UNIT_W );
 }
 
 TEST( Matrix, LookAtRH )
 {
     mat4 m = lookAtRH<float>( { 0, 0, 0 }, { 0, 0, -1 }, { 0, 1, 0 } );
 
-    ASSERT_EQ( m.X, vec4::UNIT_X );
-    ASSERT_EQ( m.Y, vec4::UNIT_Y );
-    ASSERT_EQ( m.Z, vec4::UNIT_Z );
-    ASSERT_EQ( m.W, vec4::UNIT_W );
+    ASSERT_EQ( m[0], vec4::UNIT_X );
+    ASSERT_EQ( m[1], vec4::UNIT_Y );
+    ASSERT_EQ( m[2], vec4::UNIT_Z );
+    ASSERT_EQ( m[3], vec4::UNIT_W );
+}
+
+TEST( Matrix, NonSquare_Multiplication )
+{
+    Matrix<float, 2, 3> a = { 1, 2, 3, 4, 5, 6 };
+    Matrix<float, 3, 2> b = { 7, 8, 9, 10, 11, 12 };
+
+    Matrix<float, 2, 2> c = a * b;
+
+    ASSERT_EQ( c[0][0], 58.0f );
+    ASSERT_EQ( c[0][1], 64.0f );
+    ASSERT_EQ( c[1][0], 139.0f );
+    ASSERT_EQ( c[1][1], 154.0f );
+}
+
+TEST( Matrix, NonSquare_Multiplication2 )
+{
+    Matrix<float, 3, 2> a = { 1, 2, 3, 4, 5, 6 };
+    Matrix<float, 2, 3> b = { 1, 2, 3, 4, 5, 6 };
+
+    Matrix<float, 3, 3> c = a * b;
+
+    Matrix3f expected = {
+        9, 12, 15,
+        19, 26, 33,
+        29, 40, 51
+    };
+
+    ASSERT_EQ( c, expected );
+}
+
+TEST( Matrix, Constexpr )
+{
+    static_assert( Matrix4f::IDENTITY[0][0] == 1.0f && Matrix4f::IDENTITY[0][1] == 0.0f && Matrix4f::IDENTITY[3][3] == 1.0f );
+
+    constexpr Matrix2f a = 2.0f * Matrix2f::IDENTITY;
+    static_assert( a[0][0] == 2.0f && a[1][1] == 2.0f );
+
+    static_assert( determinant( Matrix3f::IDENTITY ) == 1.0f );
+    static_assert( inverse( a )[0][0] == 0.5f );
+}
+
+TEST( Matrix, Integer_Division )
+{
+    // Division is applied per element, so it also works for integer matrices.
+    Matrix2i a { 4, 6, 8, 10 };
+
+    ASSERT_EQ( a / 2, ( Matrix2i { 2, 3, 4, 5 } ) );
+
+    a /= 2;
+    ASSERT_EQ( a, ( Matrix2i { 2, 3, 4, 5 } ) );
+}
+
+TEST( Matrix, Constexpr_Transform )
+{
+    constexpr Matrix4f t = translate( Vector3f { 1, 2, 3 } );
+    constexpr Matrix4f s = scale( Vector3f { 2, 2, 2 } );
+    constexpr Vector4f p = t * s * Vector4f { 1, 1, 1, 1 };
+
+    static_assert( p[0] == 3.0f && p[1] == 4.0f && p[2] == 5.0f && p[3] == 1.0f );
+}
+
+TEST( Matrix, Rows )
+{
+    // The matrix is stored as row vectors: m[i] is a row and m[i][j] is an element.
+    constexpr Matrix3f m { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+    static_assert( m[1] == Vector3f { 4, 5, 6 } );
+    static_assert( m[2][0] == 7.0f );
+    static_assert( m[2].x == 7.0f );
+
+    ASSERT_EQ( m.data()[5], 6.0f );
 }

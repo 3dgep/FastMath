@@ -410,3 +410,66 @@ TEST( Vector, IsNotNormalized)
 
     ASSERT_FALSE( isNormalized( a ) );
 }
+TEST( Vector, Swizzle4 )
+{
+    Vector4f a { 1, 2, 3, 4 };
+
+    auto b = swizzle( a, 3, 2, 1, 0 );
+
+    static_assert( std::is_same_v<decltype( b ), Vector4f> );
+    ASSERT_EQ( b, ( Vector4f { 4, 3, 2, 1 } ) );
+}
+
+TEST( Vector, Deadzone )
+{
+    ASSERT_EQ( deadzone( 0.1f, 0.2f ), 0.0f );
+    ASSERT_EQ( deadzone( -0.1f, 0.2f ), 0.0f );
+    ASSERT_EQ( deadzone( 0.5f, 0.2f ), 0.5f );
+    ASSERT_EQ( deadzone( -0.5f, 0.2f ), -0.5f );
+}
+
+TEST( Vector, Constexpr )
+{
+    static_assert( Vector3f::ZERO[0] == 0.0f );
+    static_assert( Vector3f::UNIT_X[0] == 1.0f && Vector3f::UNIT_X[1] == 0.0f );
+    static_assert( Vector4f::UNIT_W[3] == 1.0f );
+
+    constexpr Vector3f a = Vector3f::UNIT_X + 2.0f * Vector3f::UNIT_Y;
+    static_assert( a[0] == 1.0f && a[1] == 2.0f && a[2] == 0.0f );
+
+    // Vector4f uses SIMD for the dot product at runtime, but it must still work at compile time.
+    static_assert( dot( Vector4f::UNIT_X, Vector4f::UNIT_X ) == 1.0f );
+}
+
+TEST( Vector, Scalar_Multiplication_Commutes )
+{
+    Vector3f a { 1, 2, 3 };
+
+    ASSERT_EQ( 2.0f * a, a * 2.0f );
+    ASSERT_EQ( 2.0f * a, ( Vector3f { 2, 4, 6 } ) );
+}
+
+TEST( Vector, Constexpr_Cross )
+{
+    static_assert( cross( Vector3f::UNIT_X, Vector3f::UNIT_Y ) == Vector3f::UNIT_Z );
+    static_assert( cross( Vector3f::UNIT_Y, Vector3f::UNIT_X ) == -Vector3f::UNIT_Z );
+}
+
+TEST( Vector, Constexpr_NamedComponents )
+{
+    // Named components can be read in constant expressions.
+    constexpr Vector4f v { 1, 2, 3, 4 };
+
+    static_assert( v.x == 1.0f && v.y == 2.0f && v.z == 3.0f && v.w == 4.0f );
+    static_assert( v[3] == v.w );
+}
+
+TEST( Vector, Data )
+{
+    Vector3f v { 1, 2, 3 };
+
+    ASSERT_EQ( v.data()[2], 3.0f );
+
+    v.data()[0] = 5.0f;
+    ASSERT_EQ( v.x, 5.0f );
+}

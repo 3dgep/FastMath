@@ -2,179 +2,227 @@
 
 #include "Config.hpp"
 
+#include <cassert>
 #include <cstddef>
-
-#if LS_COMPILER == LS_COMPILER_CLANG
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
-    #pragma clang diagnostic ignored "-Wnested-anon-types"
-#elif LS_COMPILER == LS_COMPILER_GCC
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wpedantic"
-#elif LS_COMPILER == LS_COMPILER_MSVC
-    #pragma warning( push )
-    #pragma warning( disable : 4201 )
-#endif
 
 namespace FastMath
 {
+// Vectors with 2, 3, or 4 components store their components as plain `x`, `y`, `z`, `w` members,
+// so every member can be read in constant expressions (unlike a union of an array and an anonymous struct).
+//
+// `operator[]` indexes the members directly at runtime: `( &x )[i]`. The members are tightly packed
+// (this is checked by a static_assert in Vector::data()) and MSVC, GCC, and Clang all compile this
+// to a single load. Pointer arithmetic across members is not allowed in constant expressions, so at
+// compile time the member is selected with a switch instead. (A switch at runtime is not an option:
+// MSVC does not optimize it away, which made matrix multiplication about 10x slower.)
+//
+// `__builtin_is_constant_evaluated()` is what `std::is_constant_evaluated()` calls in the MSVC, GCC, and
+// Clang standard libraries. It is used directly because this operator is inlined everywhere, and the
+// extra function made optimized builds of code that uses FastMath about 5% slower to compile.
+
 /// <summary>
-/// Base class for vectors.
+/// Base class for vectors with any number of components.
 /// </summary>
 /// <typeparam name="T">The component type.</typeparam>
+/// <typeparam name="N">The number of components.</typeparam>
 template<typename T, std::size_t N>
 struct VectorBase
 {
-    constexpr VectorBase() noexcept;
+    T elements[N] {};
 
-    T vec[N];
+    constexpr T& operator[]( std::size_t i ) noexcept
+    {
+        assert( i < N );
+        return elements[i];
+    }
+
+    constexpr const T& operator[]( std::size_t i ) const noexcept
+    {
+        assert( i < N );
+        return elements[i];
+    }
 };
-
-template<typename T, std::size_t N>
-constexpr VectorBase<T, N>::VectorBase() noexcept
-: vec {}
-{}
 
 /// <summary>
 /// Partial specialization for 2-component vectors.
 /// </summary>
-/// <typeparam name="T"></typeparam>
+/// <typeparam name="T">The component type.</typeparam>
 template<typename T>
 struct VectorBase<T, 2>
 {
-    constexpr VectorBase() noexcept;
+    T x {}, y {};
 
-    union
+    constexpr T& operator[]( std::size_t i ) noexcept
     {
-        struct
+        assert( i < 2 );
+        if ( __builtin_is_constant_evaluated() )
         {
-            T x, y;
-        };
-        struct
-        {
-            T r, g;
-        };
-        struct
-        {
-            T s, t;
-        };
-        struct
-        {
-            T u, v;
-        };
-        T vec[2];
-    };
-};
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            }
+        }
 
-template<typename T>
-constexpr VectorBase<T, 2>::VectorBase() noexcept
-: vec {}
-{}
+        return ( &x )[i];
+    }
+
+    constexpr const T& operator[]( std::size_t i ) const noexcept
+    {
+        assert( i < 2 );
+        if ( __builtin_is_constant_evaluated() )
+        {
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            }
+        }
+
+        return ( &x )[i];
+    }
+};
 
 /// <summary>
 /// Partial specialization for 3-component vectors.
 /// </summary>
-/// <typeparam name="T"></typeparam>
+/// <typeparam name="T">The component type.</typeparam>
 template<typename T>
 struct VectorBase<T, 3>
 {
-    constexpr VectorBase() noexcept;
+    T x {}, y {}, z {};
 
-    union
+    constexpr T& operator[]( std::size_t i ) noexcept
     {
-        struct
+        assert( i < 3 );
+        if ( __builtin_is_constant_evaluated() )
         {
-            T x, y, z;
-        };
-        struct
-        {
-            T r, g, b;
-        };
-        T vec[3];
-    };
-};
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            }
+        }
 
-template<typename T>
-constexpr VectorBase<T, 3>::VectorBase() noexcept
-: vec {}
-{}
+        return ( &x )[i];
+    }
+
+    constexpr const T& operator[]( std::size_t i ) const noexcept
+    {
+        assert( i < 3 );
+        if ( __builtin_is_constant_evaluated() )
+        {
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            }
+        }
+
+        return ( &x )[i];
+    }
+};
 
 /// <summary>
 /// Partial specialization for 4-component vectors.
 /// </summary>
-/// <typeparam name="T"></typeparam>
+/// <typeparam name="T">The component type.</typeparam>
 template<typename T>
 struct VectorBase<T, 4>
 {
-    constexpr VectorBase() noexcept;
+    T x {}, y {}, z {}, w {};
 
-    union
+    constexpr T& operator[]( std::size_t i ) noexcept
     {
-        struct
+        assert( i < 4 );
+        if ( __builtin_is_constant_evaluated() )
         {
-            T x, y, z, w;
-        };
-        struct
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            case 3: return w;
+            }
+        }
+
+        return ( &x )[i];
+    }
+
+    constexpr const T& operator[]( std::size_t i ) const noexcept
+    {
+        assert( i < 4 );
+        if ( __builtin_is_constant_evaluated() )
         {
-            T r, g, b, a;
-        };
-        T vec[4];
-    };
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            case 3: return w;
+            }
+        }
+
+        return ( &x )[i];
+    }
 };
 
-template<typename T>
-constexpr VectorBase<T, 4>::VectorBase() noexcept
-: vec {}
-{}
-
-#if defined( LS_SSE )
+#if defined( FM_SSE )
 /// <summary>
 /// Specialization for floating-point 4-component vectors.
 /// </summary>
+/// <remarks>
+/// The vector is 16-byte aligned so that it can be loaded into an SSE register with `_mm_load_ps( &v.x )`.
+/// </remarks>
 template<>
 struct alignas( 16 ) VectorBase<float, 4>
 {
-    constexpr VectorBase() noexcept;
-    VectorBase( __m128 v ) noexcept;
+    float x {}, y {}, z {}, w {};
 
-    union
+    constexpr float& operator[]( std::size_t i ) noexcept
     {
-        struct
+        assert( i < 4 );
+        if ( __builtin_is_constant_evaluated() )
         {
-            float x, y, z, w;
-        };
-        struct
-        {
-            float r, g, b, a;
-        };
-        float  vec[4];
-        __m128 v;
-    };
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            case 3: return w;
+            }
+        }
 
-    constexpr operator __m128() const noexcept;
+        return ( &x )[i];
+    }
+
+    constexpr const float& operator[]( std::size_t i ) const noexcept
+    {
+        assert( i < 4 );
+        if ( __builtin_is_constant_evaluated() )
+        {
+            switch ( i )
+            {
+            default:
+            case 0: return x;
+            case 1: return y;
+            case 2: return z;
+            case 3: return w;
+            }
+        }
+
+        return ( &x )[i];
+    }
 };
-
-constexpr VectorBase<float, 4>::VectorBase() noexcept
-: vec {}
-{}
-
-inline VectorBase<float, 4>::VectorBase( __m128 v ) noexcept
-: v { v }
-{}
-
-constexpr VectorBase<float, 4>::operator __m128() const noexcept
-{
-    return v;
-}
-
 #endif
 
 }  // namespace FastMath
-
-#if LS_COMPILER == LS_COMPILER_CLANG
-    #pragma clang diagnostic pop
-#elif LS_COMPILER == LS_COMPILER_GCC
-    #pragma GCC diagnostic pop
-#elif LS_COMPILER == LS_COMPILER_MSVC
-    #pragma warning( pop )
-#endif

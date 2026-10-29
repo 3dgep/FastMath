@@ -244,6 +244,41 @@ TEST( Quaternion, Slerp )
     ASSERT_TRUE( all( equal( b, d, EPSILON<float> ) ) );
 }
 
+TEST( Quaternion, UnaryMinus )
+{
+    quat q { 1, 2, 3, 4 };
+    quat n = -q;
+
+    ASSERT_EQ( -1.0f, n.w );
+    ASSERT_EQ( -2.0f, n.x );
+    ASSERT_EQ( -3.0f, n.y );
+    ASSERT_EQ( -4.0f, n.z );
+}
+
+TEST( Quaternion, Slerp_ShortestPath )
+{
+    // q and -q represent the same rotation, so slerp should not rotate at all.
+    quat a = axisAngle( vec3::UNIT_Y, 0.5f );
+    quat b = -a;
+
+    quat c = slerp( a, b, 0.5f );
+
+    ASSERT_TRUE( isNormalized( c ) );
+    ASSERT_TRUE( all( equal( a, c, 1e-6f ) ) );
+}
+
+TEST( Quaternion, Slerp_NegativeDot )
+{
+    // b is a rotation of 90 degrees, but on the "far" side of the hypersphere.
+    quat a = axisAngle( vec3::UNIT_X, 0.0f );
+    quat b = -axisAngle( vec3::UNIT_X, PI_OVER_TWO<float> );
+
+    quat c = slerp( a, b, 0.5f );
+    quat e = axisAngle( vec3::UNIT_X, PI_OVER_TWO<float> * 0.5f );
+
+    ASSERT_TRUE( all( equal( e, c, 1e-6f ) ) );
+}
+
 TEST( Quaternion, Pow0 )
 {
     quat a = axisAngle( vec3::UNIT_X, PI<float> );
@@ -283,4 +318,59 @@ TEST( Quaternion, LessThanEqual )
     auto res = lessThanEqual( a, b );
 
     ASSERT_TRUE( all( res ) );
+}
+
+TEST( Quaternion, Constexpr )
+{
+    static_assert( quat::IDENTITY[0] == 1.0f && quat::IDENTITY[1] == 0.0f );
+    static_assert( quat::IDENTITY == quat {} );
+}
+
+TEST( Quaternion, Scalar_Multiplication_Commutes )
+{
+    quat q { 1, 2, 3, 4 };
+
+    ASSERT_EQ( 2.0f * q, q * 2.0f );
+    ASSERT_EQ( 2.0f * q, ( quat { 2, 4, 6, 8 } ) );
+}
+
+TEST( Quaternion, Constexpr_Arithmetic )
+{
+    constexpr quat a { 1, 2, 3, 4 };
+    constexpr quat b { 5, 6, 7, 8 };
+
+    static_assert( a + b == quat { 6, 8, 10, 12 } );
+    static_assert( b - a == quat { 4, 4, 4, 4 } );
+    static_assert( a * b == quat { -60, 12, 30, 24 } );
+    static_assert( dot( a, b ) == 70.0f );
+    static_assert( conjugate( a ) == quat { 1, -2, -3, -4 } );
+    static_assert( inverse( quat::IDENTITY ) == quat::IDENTITY );
+
+    // 180 degree rotation about the z-axis.
+    constexpr quat r { 0, 0, 0, 1 };
+    static_assert( r * vec3::UNIT_X == -vec3::UNIT_X );
+    static_assert( r * vec4 { 1, 0, 0, 1 } == vec4 { -1, 0, 0, 1 } );
+}
+
+TEST( Quaternion, Pitch_Combined )
+{
+    // Pitch must also be correct when the rotation has yaw and roll components.
+    const vec3 eulerAngles { 0.3f, 0.2f, 0.1f };
+    const quat q { eulerAngles };
+
+    ASSERT_NEAR( eulerAngles.x, FastMath::pitch( q ), 1e-5f );
+}
+
+TEST( Quaternion, SameRotation )
+{
+    const quat q = axisAngle( vec3::UNIT_Y, radians( 30.0f ) );
+
+    // q and -q are different quaternions, but the same rotation.
+    ASSERT_NE( q, -q );
+    ASSERT_TRUE( sameRotation( q, -q ) );
+    ASSERT_EQ( q * vec3::UNIT_X, -q * vec3::UNIT_X );
+
+    ASSERT_TRUE( sameRotation( q, q ) );
+    ASSERT_FALSE( sameRotation( q, axisAngle( vec3::UNIT_Y, radians( 31.0f ) ) ) );
+    ASSERT_FALSE( sameRotation( q, conjugate( q ) ) );
 }

@@ -51,7 +51,7 @@ constexpr Transform<T>::Transform( const Vector<T, 3>& scale, const Vector<T, 3>
 , rotationOrigin { rotationOrigin }
 , rotation { rotation }
 , matrix { Matrix<T, 4>::IDENTITY }
-, isDirty { false }
+, isDirty { true }
 {}
 
 template<typename T>
